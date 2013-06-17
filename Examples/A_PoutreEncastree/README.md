@@ -1,4 +1,8 @@
-------------Calcul d'une poutre encastree--------------
+Calcul d'une poutre encastree:
+-----------------------------
+
+Version Salomeca   : v2012.2 
+Version Code Aster : 10.
 
 Actions a realiser dans salome-meca (la version francaise est disponible
 dans Fichier/Preferences):
