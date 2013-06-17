@@ -12,14 +12,9 @@ theStudy = salome.myStudy
 
 import salome_notebook
 notebook = salome_notebook.notebook
-sys.path.insert( 0, r'/home/bordreuil/Enseignement/elementsFiNimes/Examples/A_PoutreEncastree')
-
-import iparameters
-ipar = iparameters.IParameters(salome.myStudy.GetCommonParameters("Interface Applicative", 1), True)
+#sys.path.insert( 0, r'/home/bordreuil/Enseignement/elementsFiNimes/Examples/A_PoutreEncastree')
 
 
-ipar.append("AP_MODULES_LIST", "Geometry")
-ipar.append("AP_MODULES_LIST", "Mesh")
 
 
 
