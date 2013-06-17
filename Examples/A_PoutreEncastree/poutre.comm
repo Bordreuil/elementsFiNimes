@@ -1,0 +1,108 @@
+#
+#  Prise en main Salome Meca - Code Aster
+#
+#	Le calcul nécessite :
+#	   - ce fichier .comm
+#          - un fichier .med (maillage, que l on peut generer
+#                             avec salome meca ou gmsh) que l on 
+#			      affectera a l unite 20. (fichier 
+#			      mmed dans salome-meca).
+#
+#	Les groupes qui doivent etre predefini au niveau
+#	   de la geometrie:
+#           - Groupe d'aretes  : TOUT
+#           - Groupe de points : Encastre, Effort 
+#
+#      Ces groupes seront convertis en au niveau du maillage
+#         dans salome-meca:
+#      	   - GROUP_MA : TOUT
+#          - GROUP_NO : Encastre, Effort
+#
+#      Le calcul genere:
+#         - un fichier de resultat au format med (unite 80)
+#	       (rmed dans salome-meca)
+#           dans lequel on retrouve deplacement et contrainte poutre.
+
+
+# Intialisation du calcul
+
+DEBUT();
+
+
+# Lecture du maillage au format med sur l unite 20 et 
+# affectation a la variable MA
+MA=LIRE_MAILLAGE(UNITE=20,
+                 FORMAT='MED',);
+
+# Definition du materiau et creation de la variable materiau MATER
+MATER=DEFI_MATERIAU(ELAS=_F(E=196200.0,
+                            NU=0.3,),);
+
+# Affectation du materiau a tout le maillage
+CHMAT=AFFE_MATERIAU(MAILLAGE=MA,
+                    AFFE=_F(TOUT='OUI',
+                            MATER=MATER,),);
+
+# Definition et Affectation du maillage sur les elements.
+# on fait de la mecanique
+# Avec une modelisation POUTRE (Theorie classique) sur tout
+# Le maillage
+MODELE=AFFE_MODELE(MAILLAGE=MA,
+                   AFFE=_F(TOUT         = 'OUI',
+                           PHENOMENE    = 'MECANIQUE',
+                           MODELISATION = 'POU_D_E',),);
+
+# Des elements poutres necessitent la definition de
+# la section. Ici on definit un tuyau
+CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
+                     POUTRE=_F(GROUP_MA = 'TOUT',
+                               SECTION  = 'CERCLE',
+                               CARA     = ('R','EP',),
+                               VALE     = (20.,2.,),),);
+
+# La structure a des conditions aux limites
+# Ici, les conditions de chargement sont relativement 
+# simple. Se referer a la doc dans eficas pour plus d infos
+CHARGE=AFFE_CHAR_MECA(MODELE=MODELE,
+                      DDL_IMPO=_F(GROUP_NO='Encastre',
+                                  DX  = 0.0,
+                                  DY  = 0.0,
+                                  DZ  = 0.0,
+                                  DRX = 0.0,
+                                  DRY = 0.0,
+                                  DRZ = 0.0,),
+                      FORCE_NODALE=_F(GROUP_NO='Effort',
+                                      FY=1000.,),);
+
+# Le calcul se deroule dans cette macro
+# Les problemes peuvent se passer lors de la resolution
+# si les conditions ne sont pas appliquees correctement
+# ou si des noeuds sont doubles au meme endroit
+# Penser a verifier le fichier .mess pour voir 
+# les options par defaut 
+RESU1=MECA_STATIQUE(MODELE     = MODELE,
+                    CHAM_MATER = CHMAT,
+                    CARA_ELEM  = CAREL,
+                    EXCIT      = _F(CHARGE=CHARGE,),);
+
+# Les contraintes sont d abord calculer dans les elements
+RESU1=CALC_ELEM(reuse    = RESU1,
+                RESULTAT = RESU1,
+                OPTION   = 'SIPO_ELNO',);
+# Ensuite interpole au noeud
+RESU1=CALC_NO(reuse      = RESU1,
+              RESULTAT   = RESU1,
+              OPTION     = 'SIPO_NOEU',);
+# puis ecrit dans le fichier de resultat .med
+# Pour le dimensionnement des sections des poutres
+# seules les contraintes dans les elements doivent
+# etre analysees: SIPO_ELNO
+
+IMPR_RESU(MODELE         = MODELE,
+          FORMAT         = 'MED',
+          RESU=_F(RESULTAT=RESU1,
+                  NOM_CHAM=('DEPL','SIPO_NOEU','SIPO_ELNO'),),);
+
+
+
+FIN(FORMAT_HDF='OUI',);
