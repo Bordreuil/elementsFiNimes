@@ -1,0 +1,132 @@
+# Stage de Kaihuye ZHANG etudiant 2eme Annee GMP de l'IUT de Nimes
+# L'objectif etait de determiner (verifier) le comportement 
+# d un metre ruban pour deplier une structure 
+#    
+#   Le ruban est modeliser au niveau geometrique par une 
+#   surface courbe.
+#
+#   Au niveau mecanique, on impose un encastrement d un cote
+#   et on impose un deplacement de l autre
+#   Kaihuye voulait determiner l effort pour imposer ce deplacement
+#   et observe comment se deformer la structure.
+#
+#   Le calcul implique une modelisation :
+#	- coque (ici DKT)
+#       - en grande transformations
+#
+#   Toutes les dimensions sont en mm
+
+DEBUT();
+
+# Definition de la fonction en temps pour le deplacement impose
+dfm=DEFI_FONCTION(
+                  NOM_PARA='INST',
+                  ABSCISSE=(0.,1.,),
+                  ORDONNEE=(0.,1.,),);
+
+# definition des pas de temps pour les increments de calcul
+LINST=DEFI_LIST_REEL(DEBUT=0.,
+                     INTERVALLE=_F(JUSQU_A=1.,
+                                   NOMBRE=20,),);
+
+# Definition des proprietes materiaux
+MA=DEFI_MATERIAU(ELAS=_F(E=2.1e+5,
+                         NU=0.3,),);
+
+# Lecture du maillage
+MAIL=LIRE_MAILLAGE(FORMAT='MED',);
+
+# Orientation du maillage,
+MAIL=MODI_MAILLAGE(reuse =MAIL,
+                   MAILLAGE=MAIL,
+                   ORIE_PEAU_3D=_F(GROUP_MA='Plaque',),
+                   ORIE_NORM_COQUE=_F(GROUP_MA='Plaque',),);
+
+# Definition du modele mecanique ici DKT pour Discrete Kirchoff Triangle qui correspond a une
+# modelisation de plaque
+
+MODE=AFFE_MODELE(MAILLAGE=MAIL,
+                 AFFE=_F(TOUT='OUI',
+                         PHENOMENE='MECANIQUE',
+                         MODELISATION='DKT',),);
+
+# Affectation des proprietes materiaux
+MATE=AFFE_MATERIAU(MAILLAGE=MAIL,
+                   AFFE=_F(TOUT='OUI',
+                           MATER=MA,),);
+
+# Affectation des caracteristiques de plaque :: epaisseur (EPAIS)
+CAREL=AFFE_CARA_ELEM(MODELE=MODE,
+                     INFO=2,
+                     COQUE=_F(GROUP_MA='Plaque',
+                              EPAIS=0.2,),);
+
+# Definition ds conditions aux limites
+CHAR=AFFE_CHAR_MECA(MODELE=MODE,
+                    DDL_IMPO=(_F(GROUP_MA='Encastre',
+                                 DX=0.,
+                                 DY=0.,
+                                 DZ=0,
+                                 DRX=0.,
+                                 DRY=0.,
+                                 DRZ=0.,),
+                              _F(GROUP_MA='Moment',
+                                 DY=-20,),),);
+
+# Definition de l analyse 
+# STAT_NON_LINE : Analyse Statique Non Lineaire : Les principales 
+#                 non linearites proviennent de la prise en compte
+#                 de la modification de la geometrie au niveau
+#                 du calcul de la rigidite (cf Bathe 1987):
+#			COMP_INCR='GROT_GDEP'
+#                 Une flexion sur une section courbe peut entrainer
+#                 une localisation des deformations a l endroit
+#                 du plus grand moment flechissant
+resu=STAT_NON_LINE(MODELE=MODE,
+                   CHAM_MATER=MATE,
+                   CARA_ELEM=CAREL,
+                   EXCIT=_F(CHARGE=CHAR,
+                            FONC_MULT=dfm,),
+                   COMP_INCR=_F(RELATION='ELAS',
+                                DEFORMATION='GROT_GDEP',),
+                   INCREMENT=_F(LIST_INST=LINST,),
+                   METHODE='NEWTON',
+                   NEWTON=_F(REAC_ITER=1,),
+                   CONVERGENCE=_F(RESI_GLOB_MAXI=1e-4,
+                                  ITER_GLOB_MAXI=50,),
+                   SOLVEUR=_F(METHODE='LDLT',),);
+
+
+# Passage des grandeurs aux points de gauss aux noeuds 
+# 	SICO : Contraintes dans les coques
+resu=CALC_ELEM(reuse =resu,
+               CHAM_MATER=MATE,
+               CARA_ELEM=CAREL,
+               RESULTAT=resu,
+               TOUT_ORDRE='OUI',
+               CRITERE='RELATIF',
+               TOUT='OUI',
+               GROUP_MA='Plaque',
+               REPE_COQUE=_F(TOUT='OUI',
+                             GROUP_MA='Plaque',
+                             NUME_COUCHE=1,
+                             NIVE_COUCHE='MOY',
+                             PLAN='MOY',),
+               OPTION=('SICO_ELNO','EPSI_ELNO',),);
+
+# Moyenne des grandeurs aux noeuds
+resu=CALC_NO(reuse =resu,
+             RESULTAT=resu,
+             OPTION=('SIGM_NOEU','SIEQ_NOEU','SICO_NOEU','EPSI_NOEU',),
+             TOUT='OUI',);
+
+# Impression des resultats dans un fichier
+# pour visualisation dans le post-pro
+IMPR_RESU(MODELE=MODE,
+          FORMAT='MED',
+          UNITE=80,
+          RESU=_F(MAILLAGE=MAIL,
+                  RESULTAT=resu,
+                  NOM_CHAM=('SICO_NOEU','DEPL','EPSI_ELNO',),),);
+
+FIN();
