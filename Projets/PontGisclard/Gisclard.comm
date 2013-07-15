@@ -1,0 +1,345 @@
+#####################################################################################
+#
+#	Fonction definissant le chargement des essieux sur le rail
+#
+#
+#      Pour verifier la syntaxe sous eficas, il faut commenter cette partie
+def essieu(X,Y,Z,t,FY,Zo) :
+# X, Y, Z sont les coordonnees du noeud courant
+  v     = 5000000./3600.	   # vitesse en mm/s
+  dist  = Z-v*t-Zo
+  
+  LElem = 1300	
+  if abs(dist) <= LElem:
+      print 'found one at :',Z 
+      if dist  < 0.:
+         effort= FY*(LElem+dist)/LElem
+	 print effort
+      	 return effort
+      else:
+        effort = FY*(LElem-dist)/LElem
+	print effort
+	return  effort
+  else : return 0
+
+#####################################################################################
+#
+#
+#                  	Debut du calcul
+#
+#
+#
+
+
+	 
+DEBUT();
+
+MA=LIRE_MAILLAGE(UNITE=20,
+                 FORMAT='MED',);
+
+# Initialisation des variables de temps
+tmax = 180.0;
+
+nbpas = 180;
+
+
+# Initialisation d'une fonction nulle
+
+nul = FORMULE(VALE='0.',
+              NOM_PARA=('X','Y','Z',),);
+
+# definition des pas de temps
+
+LISTIME=DEFI_LIST_REEL(DEBUT=0,
+                       INTERVALLE=_F(JUSQU_A=tmax,
+                                     NOMBRE=nbpas,),);
+
+#####################################################################################
+#
+#
+#                  definition et affectation du materiau
+#
+#
+#
+
+
+# Pour les poutres
+MATER=DEFI_MATERIAU(ELAS=_F(E=196200.0,
+                            NU=0.3,
+                            RHO=10.0,
+                            AMOR_ALPHA=0.1,
+                            AMOR_BETA=0.1,),);
+# Pour les cables
+MATERC=DEFI_MATERIAU(ELAS=_F(E=196200,
+                             NU=0.3,
+                             RHO=10000.,
+                             ALPHA=12e-6,),
+                     CABLE=_F(EC_SUR_E=1.E-4,),);
+
+CHMAT=AFFE_MATERIAU(MAILLAGE=MA,
+                    AFFE=(_F(GROUP_MA=('Pylone1','Pylone2','Pylone3','Pylone4','Pylone5','Pylone6','Pylone7','Pylone8','Tablier1',
+                                        'Tablier2','Tablier3','Tablier4','Tablier5','Axecabl','Cabl40v',),MATER=MATER,),
+   			  _F(GROUP_MA=('Cabl33h','Cabl27h','Cabl20h','Cabl14h','Cabl39h','Cabl45h','Cabl49h','Cabl54h','Cabl59h',
+                                         'Cabl61','Cabl49s','Cabl46s','Cabl42s','Cabl39s','Cabl37s','Cabl35i','Cabl30i',
+                                         'Cabl32i','Cabl40c',),
+                              MATER=MATERC,),),);
+#####################################################################################
+#
+#
+#                     definition du modele mecanique
+#
+#
+## 
+MODELE=AFFE_MODELE(MAILLAGE=MA,
+                   AFFE=(_F(GROUP_MA=('Pylone1','Pylone2','Pylone3','Pylone4','Pylone5','Pylone6','Pylone7','Pylone8','Tablier1',
+                                       'Tablier2','Tablier3','Tablier4','Tablier5','Axecabl','Cabl40v',),
+                            PHENOMENE='MECANIQUE',
+                            MODELISATION='POU_D_E',),
+                         _F(GROUP_MA=('Cabl33h','Cabl27h','Cabl20h','Cabl14h','Cabl39h','Cabl45h','Cabl49h','Cabl54h','Cabl59h',
+                                        'Cabl61','Cabl49s','Cabl46s','Cabl42s','Cabl39s','Cabl37s','Cabl35i','Cabl30i',
+                                        'Cabl32i','Cabl40c',),
+                             PHENOMENE='MECANIQUE',
+                             MODELISATION='CABLE',),),
+			    );
+# Precharge pour les cables
+precha = 000;
+
+
+# Affectation des caracteristiques de sections
+
+CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
+                     POUTRE=(
+			      _F(GROUP_MA='Pylone1',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(37708.0,207820884.97,1205634211.44,1.,1.,415600000.,),),
+                             _F(GROUP_MA='Pylone2',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(32108.0,207820884.97,207820884.97,1.,1.,415600000.,),),
+                             _F(GROUP_MA='Pylone3',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(32108.0,207820884.97,207820884.97,1.,1.,415600000.,),),
+                             _F(GROUP_MA='Pylone4',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(6912.0,15001285.,15001285.,1.,1.,30000250.,),),
+                             _F(GROUP_MA='Pylone5',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(2736.,3732455.97,3732455.97,1.,1.,7464900.,),),
+                             _F(GROUP_MA='Pylone6',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(32108.0,207820884.97,207820884.97,1.,1.,415600000.,),),
+                             _F(GROUP_MA='Pylone7',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(32108.0,207820884.97,207820884.97,1.,1.,415600000.,),),
+                             _F(GROUP_MA='Pylone8',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(2736.,3732455.97,3732455.97,1.,1.,7464900.,),),
+                             _F(GROUP_MA='Tablier1',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(32108.0,207820884.97,207820884.97,1.,1.,415600000.,),),
+                             _F(GROUP_MA='Tablier2',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(23234.0,2134042916.8,19993523.7788,1.,1.,415600000.,),),
+                             _F(GROUP_MA='Tablier3',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(70364.0,8971155445.43,164346453.319,1.,1.,415600000.,),),
+                             _F(GROUP_MA='Tablier4',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(32108.0,207820884.97,207820884.97,1.,1.,415600000.,),),
+                             _F(GROUP_MA='Tablier5',
+                                SECTION='GENERALE',
+                                CARA=('A','IY','IZ','AY','AZ','JX',),
+                                VALE=(32108.0,207820884.97,207820884.97,1.,1.,415600000.,),),
+                             _F(GROUP_MA='Axecabl',
+                                SECTION='CERCLE',
+                                CARA='R',
+                                VALE=60.,),
+                             _F(GROUP_MA='Cabl40v',
+                                SECTION='CERCLE',
+                                CARA='R',
+                                VALE=20.,),),
+			      CABLE=(_F(GROUP_MA='Cabl33h',
+                                 N_INIT=precha,
+                                 SECTION=855,),
+                              _F(GROUP_MA='Cabl27h',
+                                 N_INIT=precha,
+                                 SECTION=572,),
+                              _F(GROUP_MA='Cabl20h',
+                                 N_INIT=precha,
+                                 SECTION=314,),
+                              _F(GROUP_MA='Cabl14h',
+                                 N_INIT=precha,
+                                 SECTION=154,),
+                              _F(GROUP_MA='Cabl39h',
+                                 N_INIT=precha,
+                                 SECTION=1195,),
+                              _F(GROUP_MA='Cabl45h',
+                                 N_INIT=precha,
+                                 SECTION=1590,),
+                              _F(GROUP_MA='Cabl49h',
+                                 N_INIT=precha,
+                                 SECTION=1886,),
+                              _F(GROUP_MA='Cabl54h',
+                                 N_INIT=precha,
+                                 SECTION=2290,),
+                              _F(GROUP_MA='Cabl59h',
+                                 N_INIT=precha,
+                                 SECTION=2734,),
+                              _F(GROUP_MA='Cabl61',
+                                 N_INIT=precha,
+                                 SECTION=2922,),
+                              _F(GROUP_MA='Cabl49s',
+                                 N_INIT=precha,
+                                 SECTION=1886,),
+                              _F(GROUP_MA='Cabl46s',
+                                 N_INIT=precha,
+                                 SECTION=1662,),
+                              _F(GROUP_MA='Cabl42s',
+                                 N_INIT=precha,
+                                 SECTION=1385,),
+                              _F(GROUP_MA='Cabl39s',
+                                N_INIT=precha,
+                                 SECTION=1195,),
+                              _F(GROUP_MA='Cabl37s',
+                                 N_INIT=precha,
+                                 SECTION=1075,),
+                              _F(GROUP_MA='Cabl35i',
+                                 N_INIT=precha,
+                                 SECTION=962,),
+                              _F(GROUP_MA='Cabl30i',
+                                 N_INIT=precha,
+                                 SECTION=707,),
+                              _F(GROUP_MA='Cabl32i',
+                                 N_INIT=precha,
+                                 SECTION=804,),
+                              _F(GROUP_MA='Cabl40c',
+                                 N_INIT=precha,
+                                 SECTION=1257,),),);
+#		ORIENTATION=_F(GROUP_MA = ('Tablier2','Tablier3'),
+#		               CARA     = 'ANGL_VRIL',
+#			       VALE     = 90.,),
+#			        );
+#####################################################################################
+#
+#  definition du chargement
+#
+#
+# 
+essieu1 = FORMULE(VALE='essieu(X,Y,Z,INST,-40000.,-36000)',
+                  NOM_PARA=('X','Y','Z','INST',),);
+
+essieu2 = FORMULE(VALE='essieu(X,Y,Z,INST,-40000.,-38000)',
+                  NOM_PARA=('X','Y','Z','INST',),);
+
+essieu3 = FORMULE(VALE='essieu(X,Y,Z,INST,-40000.,-42000)',
+                  NOM_PARA=('X','Y','Z','INST',),);
+essieu4 = FORMULE(VALE='essieu(X,Y,Z,INST,-40000.,-44000)',
+                  NOM_PARA=('X','Y','Z','INST',),);
+
+PRESSION=AFFE_CHAR_MECA_F(MODELE=MODELE,
+                          FORCE_NODALE=(_F(GROUP_NO='Table2',
+                                          FZ=essieu1),
+					_F(GROUP_NO='Table2',
+                                          FZ=essieu2),
+					_F(GROUP_NO='Table2',
+                                          FZ=essieu3),
+					_F(GROUP_NO='Table2',
+                                          FZ=essieu4)));
+nodesSommetChargVent = ('N85', 'N543', 'N220', 'N678');
+
+
+# 83277.5;
+chargVent = 0.0;
+
+
+CHARGE=AFFE_CHAR_MECA(MODELE=MODELE,
+                      DDL_IMPO=_F(GROUP_MA=('Ancpyl','Anccabl','Anctabl',),
+                                  DX=0.,
+                                  DY=0.,
+                                  DZ=0.,
+                                  DRX=0.,
+                                  DRY=0.,
+                                  DRZ=0.,),
+                      FORCE_NODALE=_F(NOEUD=nodesSommetChargVent,
+                                      FX=chargVent,),);
+
+PESA=AFFE_CHAR_MECA(MODELE=MODELE,
+                    PESANTEUR=_F(GRAVITE=0,
+                                 DIRECTION=(0.,-1.,0.,),),);
+
+pesa_m=DEFI_FONCTION(
+                     NOM_PARA='INST',
+                     VALE=(0,0,
+                           1.,1.,
+                           ),
+                     PROL_DROITE='CONSTANT',);
+#####################################################################################
+#
+#  Calcul non lineaire
+#
+#
+#
+RESU1=STAT_NON_LINE(MODELE=MODELE,
+                    CHAM_MATER=CHMAT,
+                    CARA_ELEM=CAREL,
+                    EXCIT=(_F(CHARGE=CHARGE,),
+                           _F(CHARGE=PRESSION,),
+                           #_F(CHARGE=PESA,
+                           #   FONC_MULT=pesa_m,
+                           #   TYPE_CHARGE='FIXE_CSTE',),
+			   ),
+                    COMP_INCR=_F(RELATION='ELAS',
+                                 DEFORMATION='PETIT',
+                                 GROUP_MA=
+                                 ('Pylone1','Pylone2','Pylone3','Pylone4','Pylone5',
+                                            'Pylone6','Pylone7','Pylone8','Tablier1','Tablier2','Tablier3','Tablier4',
+                                            'Tablier5','Axecabl','Cabl40v',),),
+                     COMP_ELAS=_F(RELATION='CABLE',
+                                  DEFORMATION='GROT_GDEP',
+                                  GROUP_MA=
+                                  ('Cabl33h','Cabl27h','Cabl20h','Cabl14h','Cabl39h',
+                                             'Cabl45h','Cabl49h','Cabl54h','Cabl59h','Cabl61','Cabl49s','Cabl46s','Cabl42s',
+                                             'Cabl39s','Cabl37s','Cabl35i','Cabl30i','Cabl32i','Cabl40c',),),
+                    INCREMENT=_F(LIST_INST=LISTIME,),
+                    NEWTON=_F(#PREDICTION='TANGENTE',
+                              #MATRICE='ELASTIQUE',
+                              REAC_ITER=1,),
+                    #RECH_LINEAIRE=_F(METHODE='CORDE',),
+                    CONVERGENCE=_F( #RESI_GLOB_RELA=2.e-4,
+                                   ITER_GLOB_MAXI=50,),
+                    SOLVEUR=_F(METHODE='LDLT',),);
+
+
+
+#####################################################################################
+#
+#      Post Traitement
+#
+#
+#
+
+
+RESU1=CALC_ELEM(reuse =RESU1,
+                RESULTAT=RESU1,
+                OPTION=('SIPO_ELNO','SIEF_ELNO',),);
+
+
+IMPR_RESU(MODELE=MODELE,
+          FORMAT='MED',
+          UNITE=80,
+          RESU=_F(RESULTAT=RESU1,
+                  NOM_CHAM=('DEPL','SIPO_ELNO','SIEF_ELNO',),
+                  TOUT='OUI',),);
+
+FIN(FORMAT_HDF='OUI',);
