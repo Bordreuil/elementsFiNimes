@@ -1,0 +1,84 @@
+#  
+# Tp Dut GMP - Iut de Nimes
+#    cyril.bordreuil@univ-montp2.fr
+#    
+#    Analyse d un culot pour determination
+#      d'un endroit critique et 
+#      limitation de la methode des elements finis
+#
+# Initialisation du calcul
+
+DEBUT();
+
+# Definition du materiau
+
+MA=DEFI_MATERIAU(ELAS=_F(E=210000.0,
+                         NU=0.3,),);
+
+# Lecture du maillage
+
+MAIL=LIRE_MAILLAGE(FORMAT='MED',);
+
+# Modification du maillage pour creer a partir 
+# du segment ou la pression sera applique 
+# une orientation des elements de peau
+
+MAIL=MODI_MAILLAGE(reuse =MAIL,
+                   MAILLAGE=MAIL,
+                   ORIE_PEAU_2D=_F(GROUP_MA='Inter',),);
+
+# Definition du modele mecanique
+
+MODE=AFFE_MODELE(MAILLAGE=MAIL,
+                 AFFE=_F(TOUT='OUI',
+                         PHENOMENE='MECANIQUE',
+                         MODELISATION='AXIS',),);
+
+# Affectation des proprietes materiau
+
+MATE=AFFE_MATERIAU(MAILLAGE=MAIL,
+                   AFFE=_F(TOUT='OUI',
+                           MATER=MA,),);
+
+# Affectation des conditions aux limites
+# Le groupe 'Haut' modelise la presence de matiere au dessus
+# Le groupe 'Inter' modelise l interieur du verin soumis à 100 bars
+ 
+CHAR=AFFE_CHAR_MECA(MODELE=MODE,
+                    DDL_IMPO=_F(GROUP_NO='Haut',
+                                DY=0.0,),
+                    PRES_REP=_F(GROUP_MA='Inter',
+                                PRES=10,),);
+
+# Resolution du probleme
+
+RESU=MECA_STATIQUE(MODELE=MODE,
+                   CHAM_MATER=MATE,
+                   EXCIT=_F(CHARGE=CHAR,),);
+
+# Extraction des resulats:
+# 	     - SIGM : Tenseur des contraintes
+#	     - SIEQ : Contraintes equivalentes
+
+RESU=CALC_ELEM(reuse =RESU,
+               MODELE=MODE,
+               CHAM_MATER=MATE,
+               RESULTAT=RESU,
+               OPTION=('SIGM_ELNO','SIEQ_ELNO',),
+               EXCIT=_F(CHARGE=CHAR,),);
+
+# Moyennation au niveau des noeuds pour la visualisation
+
+RESU=CALC_NO(reuse =RESU,
+             RESULTAT=RESU,
+             OPTION=('SIGM_NOEU','SIEQ_NOEU',),);
+
+# Extraction au niveau d un fichier de sortie
+
+IMPR_RESU(FORMAT='MED',
+          UNITE=80,
+          RESU=_F(MAILLAGE=MAIL,
+                  RESULTAT=RESU,
+                  NOM_CHAM=('SIGM_NOEU','SIEQ_NOEU','DEPL','SIGM_ELNO',),),);
+
+FIN();
