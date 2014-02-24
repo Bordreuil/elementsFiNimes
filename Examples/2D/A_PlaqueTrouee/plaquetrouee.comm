@@ -24,6 +24,7 @@ MAIL=MODI_MAILLAGE(reuse=MAIL,
                    );
 
 # Definition du modele mecanique
+# C_PLAN est le mot cle pour contraintes planes
 MODE=AFFE_MODELE(MAILLAGE=MAIL,
                  AFFE=_F(TOUT='OUI',
                          PHENOMENE='MECANIQUE',
@@ -36,6 +37,13 @@ MATE=AFFE_MATERIAU(MAILLAGE=MAIL,
                            MATER=MA,),);
 
 # Affectation des conditions aux limites
+#   DDL_IMPO = pour un degre de liberte impose en 2D ce ne sont que des 
+#              deplacement.
+#              En general, les DDL_IMPO s'applique sur des noeuds
+#              mais le code aster convertir des groupes 
+#   PRES_REP = pression : cette action est distribuee, elle s'applique sur
+#              des elements geomertiques de surfaces plan -> segment
+#              on les applique sur un groupe de maille
 CHAR=AFFE_CHAR_MECA(MODELE=MODE,
                     DDL_IMPO=(
                         _F(GROUP_MA='Bas',
