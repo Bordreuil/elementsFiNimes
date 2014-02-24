@@ -91,13 +91,14 @@ Maillage_1 = smesh.Mesh(Treillis)
 Regular_1D = Maillage_1.Segment()
 Nb_Segments_1 = Regular_1D.NumberOfSegments(1)
 Nb_Segments_1.SetDistrType( 0 )
+
+isDone = Maillage_1.Compute()
 Treillis_1 = Maillage_1.GroupOnGeom(Treillis,'Treillis',SMESH.EDGE)
 Liaison = Maillage_1.CreateEmptyGroup( SMESH.NODE, 'Liaison' )
 nbAdd = Liaison.Add( [ 1, 4 ] )
 Efforts = Maillage_1.CreateEmptyGroup( SMESH.NODE, 'Efforts' )
 nbAdd = Efforts.Add( [ 2, 3 ] )
 isDone = Maillage_1.Compute()
-
 ## set object names
 smesh.SetName(Maillage_1.GetMesh(), 'Maillage_1')
 smesh.SetName(Regular_1D.GetAlgorithm(), 'Regular_1D')
