@@ -1,0 +1,89 @@
+#
+#	Calcul de contraintes sur pieces 3D
+#
+#	La piece fait partie d'une prototypeuse developpe
+#       a l'IUT de Nimes.
+#	
+#	La geometrie venant d'un fichier step est en m. 
+#
+#      Des groupes de Noeuds doivent être defini
+#      	   - Appui1
+#	   - Appui2 
+#      et un groupes de mailles
+#      	   - Tige ou on va applique une pression correspondant
+#	      a l'action de la tige filete
+#          
+
+DEBUT();
+
+# Definition du materiau
+MA=DEFI_MATERIAU(ELAS=_F(E=210000000000.0,
+                         NU=0.3,),);
+# Lecture du maillage
+MAIL=LIRE_MAILLAGE(FORMAT='MED',);
+
+# Orientation des mailles de surface sur le groupe de maille Tige
+#  pour appliquer la pression
+MAIL=MODI_MAILLAGE(reuse =MAIL,
+                   MAILLAGE=MAIL,
+                   ORIE_PEAU_3D=_F(GROUP_MA='Tige',),);
+
+# Definition et Affectation du modele 3D
+MODE=AFFE_MODELE(MAILLAGE=MAIL,
+                 AFFE=_F(TOUT='OUI',
+                         PHENOMENE='MECANIQUE',
+                         MODELISATION='3D',),);
+# Affectation du materiau defini plus haut (variable : MA)
+MATE=AFFE_MATERIAU(MAILLAGE=MAIL,
+                   AFFE=_F(TOUT='OUI',
+                           MATER=MA,),);
+
+# Definition et Affectation du chargement mecanique
+CHAR=AFFE_CHAR_MECA(MODELE=MODE,
+                    DDL_IMPO=(_F(GROUP_MA='Appui1',
+                                 DX=0.0,
+                                 DY=0.0,
+                                 DZ=0.0,),
+                              _F(GROUP_MA='Appui2',
+                                 DX=0.0,
+                                 DY=0.0,
+                                 DZ=0.0,),),
+                    PRES_REP=_F(GROUP_MA='Tige',
+                                PRES=10.0,),);
+# Resolution du probleme
+RESU=MECA_STATIQUE(MODELE=MODE,
+                   CHAM_MATER=MATE,
+                   EXCIT=_F(CHARGE=CHAR,),);
+
+# Calcul des grandeurs stockees aux points de gauss 
+# et extrapolation aux noeuds dans chaque elements
+# Le premier identifiant SIGM est pour le tenseur des contraintes
+# et le second pour dire qu'on veut le calculer au noeud pour un element
+# ELNO (il y a donc plusieurs valeurs pour un noeud appartenant a plusieurs
+# elements.
+# Les grandeurs calcules sont ici:
+#     	-SIGM_ELNO : Tenseur des contraintes
+# 	-SIEQ_ELNO : Contraintes equivalentes (Tresca, Von mises+ 
+#		     		 	      contraintes principales) 
+RESU=CALC_ELEM(reuse =RESU,
+               MODELE=MODE,
+               CHAM_MATER=MATE,
+               RESULTAT=RESU,
+               OPTION=('SIGM_ELNO','SIEQ_ELNO',),
+               EXCIT=_F(CHARGE=CHAR,),);
+
+# Calcul des grandeurs au noeuds (moyenne des valeurs 
+# des noeuds dans chaque element
+RESU=CALC_NO(reuse =RESU,
+             RESULTAT=RESU,
+             OPTION=('SIGM_NOEU','SIEQ_NOEU',),);
+
+# Impression des differents resultats dans un fichier pour visualisation
+# dans salomeca
+IMPR_RESU(FORMAT='MED',
+          UNITE=80,
+          RESU=_F(MAILLAGE=MAIL,
+                  RESULTAT=RESU,
+                  NOM_CHAM=('SIGM_NOEU','SIEQ_NOEU','DEPL',),),);
+
+FIN();
