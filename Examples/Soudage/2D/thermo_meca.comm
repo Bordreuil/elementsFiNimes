@@ -1,0 +1,150 @@
+# 
+#
+#	Modelisation thermo mecanique simplifie
+#	d une operation de soudage
+#
+#
+#
+def gaussien(X,Y,t,FY) :
+    v  = 100./60.	   
+    Xo = 0.
+    Yo = 0.
+    Ro = 3.
+    Q=FY*exp(-((X-Xo)**2./Ro**2+((Y-v*t-Yo)**2./Ro**2.))/3.)/3.1/Ro**2.
+    return Q
+#------------------------------------------------------------------
+#                       CALCUL ASTER
+#-------------------------------------------------------------------
+
+DEBUT(PAR_LOT='NON',);
+
+MA=LIRE_MAILLAGE(UNITE=20,FORMAT='MED');
+
+# Definition du materiau (ACIER 16MND5)
+# Les unites ont ete bascule pour que l unite de longueur soit le mm
+
+ACIER_T=DEFI_MATERIAU(THER=_F(LAMBDA=16.5,
+                              RHO_CP=0.0039,),);
+
+# Definition des instants de calcul pour une analyse non lineraire
+
+L_INST=DEFI_LIST_REEL(DEBUT=0.0,
+                      INTERVALLE=_F(JUSQU_A=120.0,
+                                    NOMBRE=120,),);
+
+# Affectation du modele de thermique
+
+MODELE=AFFE_MODELE(MAILLAGE=MA,
+                   AFFE=_F(TOUT='OUI',
+                           PHENOMENE='THERMIQUE',
+                           MODELISATION='PLAN',),);
+
+# Affectation du materiau a notr plaque
+
+MAT=AFFE_MATERIAU(MAILLAGE=MA,
+                  AFFE=_F(GROUP_MA='TOUT',
+                          MATER=ACIER_T,),);
+
+# Definition d une formule pour calcul du flux gaussien
+
+aussien1 = FORMULE(VALE='gaussien(X,Y,INST,100.E2)',
+                   NOM_PARA=('X','Y','INST',),);
+
+#ECH =AFFE_CHAR_THER(MODELE=MODELE,
+#                    ECHANGE=_F( GROUP_MA = 'GM7', 
+#		     		 COEF_H = 30.0e-6,
+#                                    TEMP_EXT = 260.0),);
+# Utilisation de la formule dans un chargement de thermique
+
+FLUTHER=AFFE_CHAR_THER_F(MODELE=MODELE,
+                         SOURCE=_F(GROUP_MA='TOUT',
+                                   SOUR=aussien1,),);
+
+# Calcul thermique transitoire
+# Les resultats sont dans l objet TEMP
+
+TEMP=THER_LINEAIRE(MODELE=MODELE,
+                   CHAM_MATER=MAT,
+                   EXCIT=_F(CHARGE=FLUTHER,),
+                   INCREMENT=_F(LIST_INST=L_INST,),
+                   ETAT_INIT=_F(VALE=20.E0,),
+                   SOLVEUR=_F(METHODE='MULT_FRONT',
+                              RENUM='METIS',
+                              NPREC=8,
+                              STOP_SINGULIER='OUI',),);
+
+#
+#
+# ETUDE MECANIQUE : 
+#
+#
+# Affectation du modele mecanique
+
+MOMECA=AFFE_MODELE(MAILLAGE=MA,
+                   VERIF='MAILLE',
+                   AFFE=_F(TOUT='OUI',
+                           PHENOMENE='MECANIQUE',
+                           MODELISATION='C_PLAN',),);
+
+# Definition de la courbe de traction
+
+CTRAC=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(2.185E-3,437.,
+                          9.185E-3,437.,
+                          0.010235,447.,
+                          0.015385,477.,
+                          0.020485,497.,
+                          ),
+                    PROL_DROITE='CONSTANT',
+                    PROL_GAUCHE='CONSTANT',);
+
+# Affectation des proprietes materiau 
+
+mat=DEFI_MATERIAU(ELAS=_F(E=180000.0,
+                          NU=0.3,
+                          ALPHA=5e-06,),
+                  TRACTION=_F(SIGM=CTRAC,),);
+
+CMME1=AFFE_MATERIAU(MAILLAGE=MA,
+                    AFFE=_F(TOUT='OUI',
+                            MATER=mat,),
+                    AFFE_VARC=_F(TOUT='OUI',
+                                 NOM_VARC='TEMP',
+                                 EVOL=TEMP,
+                                 VALE_REF=20.,),);
+
+CHAR1=AFFE_CHAR_MECA(MODELE=MOMECA,
+                     DDL_IMPO=(_F(GROUP_NO='Bride',
+                                  DX=0.,
+                                  DY=0.,),
+                               _F(GROUP_NO='SymY',
+                                  DY=0.,),),);
+
+DU=STAT_NON_LINE(MODELE=MOMECA,
+                 CHAM_MATER=CMME1,
+                 EXCIT=_F(CHARGE=CHAR1,),
+                 COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
+                 INCREMENT=_F(LIST_INST=L_INST,),);
+
+# POST_TRAITEMENT POUR OBTENIR LES FLUX AUX NOEUDS ET
+# L'INDICATEUR D'ERREUR THERMIQUE EN RESIDU.
+
+DU=CALC_ELEM(reuse =DU,
+             RESULTAT=DU,
+             TYPE_OPTION='TOUTES',
+             OPTION=('VARI_ELNO','SIEQ_ELNO','SIEF_ELNO',),);
+
+DU=CALC_NO(reuse =DU,
+           RESULTAT=DU,
+           OPTION='SIGM_NOEU',);
+
+IMPR_RESU(MODELE=MOMECA,
+          FORMAT='MED',
+          RESU=(_F(RESULTAT=DU,
+                   NOM_CHAM=('SIGM_NOEU','SIEQ_NOEU',),),
+                _F(RESULTAT=TEMP,
+                   NOM_CHAM='TEMP',),),);
+
+FIN();
+#CHECKSUM:0869e7cc000957d504e49f562041e2fc  -:FIN CHECKSUM

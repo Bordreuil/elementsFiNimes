@@ -1,0 +1,140 @@
+#
+#
+#	TP EF: Formation Genie mecanique Nimes
+#	Quart de plaque trouee avec un comportement
+#	Elasto-Plastique
+#	Les groupes utilises dans l'analyse sont:
+#	    - Haut pour l'application de l'effort
+#	    - Sym1 et Sym2 pour l'application des conditions de symetries
+#	 
+#	 Contact : cyril.bordreuil@univ-montp2.fr
+#
+# -----> Debut du calcul
+
+DEBUT();
+
+# -----> Defintion du materiau
+
+CTRAC=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(2.185E-3,437.,
+                          9.185E-3,437.,
+                          0.010235,447.,
+                          0.015385,477.,
+                          0.020485,497.,
+                          ),
+                    PROL_DROITE='CONSTANT',
+                    PROL_GAUCHE='CONSTANT',);
+
+MA=DEFI_MATERIAU(ELAS=_F(E=210000.0,
+                         NU=0.3,),
+                 TRACTION=_F(SIGM=CTRAC,),);
+
+# -----> Lecture du maillage
+
+MAIL=LIRE_MAILLAGE(FORMAT='MED',);
+
+# -----> Orientation des mailles associes a la surface Haut
+#        ici un ensemble de lignes
+
+MAIL=MODI_MAILLAGE(reuse =MAIL,
+                   MAILLAGE=MAIL,
+                   ORIE_PEAU_2D=_F(GROUP_MA='Haut',),);
+
+# -----> Definition d un calcul en contraintes planes
+
+MODE=AFFE_MODELE(MAILLAGE=MAIL,
+                 AFFE=_F(TOUT='OUI',
+                         PHENOMENE='MECANIQUE',
+                         MODELISATION='C_PLAN',),);
+
+# ------> Affectation du materiau
+
+MATE=AFFE_MATERIAU(MAILLAGE=MAIL,
+                   AFFE=_F(TOUT='OUI',
+                           MATER=MA,),);
+
+# ------> Definition du chargement mecanique pour
+# 	  le quart de poutre
+
+CH1=AFFE_CHAR_MECA(MODELE=MODE,
+                   DDL_IMPO=(_F(GROUP_MA='Sym1',
+                                DY=0.0,),
+                             _F(GROUP_MA='Sym2',
+                                DX=0.0,),),);
+
+CH2=AFFE_CHAR_MECA(MODELE=MODE,
+                   PRES_REP=_F(GROUP_MA='Haut',
+                               PRES=-150.0,),);
+
+# ----> Definition de la resolution du probleme 
+# 	non lineaire et de sa resolution en temps
+#	Le probleme est quasi statique : le temps
+#	est un artifice pour gere la partie incrementale
+
+L_INST=DEFI_LIST_REEL(DEBUT=0.0,
+                      INTERVALLE=_F(JUSQU_A=1.,
+                                    NOMBRE=20,),);
+
+F_SIGM=DEFI_FONCTION(
+                     NOM_PARA='INST',
+                     VALE=(0.0,0.0,
+                           1.0,1.0,
+                           ),);
+
+#------> Resolution du probleme
+#	COMP_INCR : Gere le compertement incrementale du probleme
+#	de statique non lineaire (ici Plasticite isotrope avec critere 
+#	   	    		 de Von Mises avec definition de la courbe
+#				 de traction (a defenir dans CHMA_MATE))
+
+RESU=STAT_NON_LINE(MODELE=MODE,
+                   CHAM_MATER=MATE,
+                   EXCIT=(_F(CHARGE=CH1,),
+                          _F(CHARGE=CH2,
+                             FONC_MULT=F_SIGM,),),
+                   COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
+                   INCREMENT=_F(LIST_INST=L_INST,),
+                   CONVERGENCE=_F(ITER_GLOB_MAXI=10,),);
+
+# ----> Calcul de valeur pour le post  traitement
+
+RESU=CALC_ELEM(reuse =RESU,
+               RESULTAT=RESU,
+               OPTION=('SIEF_ELNO','SIEQ_ELNO',),);
+
+RESU=CALC_NO(reuse =RESU,
+             RESULTAT=RESU,
+             OPTION=('SIEF_NOEU','SIEQ_NOEU',),);
+
+# -----> Impression du resulat au format MED
+
+IMPR_RESU(FORMAT='MED',
+          UNITE=80,
+          RESU=_F(MAILLAGE=MAIL,
+                  RESULTAT=RESU,
+                  NOM_CHAM=('SIEF_NOEU','SIEQ_NOEU','DEPL',),),);
+
+# -----> Extraction des contraintes le long de la symetrie
+#        pour avoir la concentration
+#        Pour extraire ces donnees, il faut configurer un fichier
+#	 pour la sortie. Cette operation ce fait a travers
+#	 astk qu'on peut lancer a partir de salome meca dans le module
+#	 Aster. Ensuite on cree un fichier de type agraf, ou on va poser
+#  	 les resultats. !!! unite du fichier dans astk = celle dans
+#	 ce fichier .comm
+
+T_RESU=POST_RELEVE_T(ACTION=_F(OPERATION='EXTRACTION',
+                               INTITULE='LIGNE',
+                               RESULTAT=RESU,
+                               NOM_CHAM='SIEF_NOEU',
+                               GROUP_NO='Sym1',
+                               TOUT_CMP='OUI',),);
+
+IMPR_TABLE(TABLE=T_RESU,
+           FORMAT='AGRAF',
+           UNITE=25,
+           NOM_PARA=('COOR_X','SIYY',),);
+
+FIN();
+#CHECKSUM:d47edcda4f780f0e4612a69dff8cf94d  -:FIN CHECKSUM

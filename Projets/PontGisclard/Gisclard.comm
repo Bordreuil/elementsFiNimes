@@ -256,6 +256,7 @@ PRESSION=AFFE_CHAR_MECA_F(MODELE=MODELE,
                                           FZ=essieu3),
 					_F(GROUP_NO='Table2',
                                           FZ=essieu4)));
+
 nodesSommetChargVent = ('N85', 'N543', 'N220', 'N678');
 
 

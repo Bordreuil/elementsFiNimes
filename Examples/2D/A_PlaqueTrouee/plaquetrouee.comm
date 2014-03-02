@@ -3,6 +3,7 @@
 #    cyril.bordreuil@univ-montp2.fr
 #    
 #    Analyse d une plaque trouee en contraintes planes
+#    Dans le cas ou toute la structure est maillee
 #
 
 # Initialisation du calcul
@@ -52,7 +53,7 @@ CHAR=AFFE_CHAR_MECA(MODELE=MODE,
                         ),
                     PRES_REP=(
                         _F(GROUP_MA='Haut',
-                           PRES=1.0,),
+                           PRES=-1.0,),
                         ),
                     );
 # Resolution du probleme
@@ -63,14 +64,11 @@ RESU=MECA_STATIQUE(MODELE=MODE,
 
 # Extraction des resulats:
 # 	     - SIGM : Tenseur des contraintes
+#	       	    determine a partir des deplacements
 #	     - SIEQ : Contraintes equivalentes
 RESU=CALC_ELEM(reuse=RESU,
-               MODELE=MODE,
-               CHAM_MATER=MATE,
                RESULTAT=RESU,
-               OPTION=('SIGM_ELNO','SIEQ_ELNO',),
-               EXCIT=_F(
-               CHARGE=CHAR,),);
+               OPTION=('SIGM_ELNO','SIEQ_ELNO',),);
 
 # Moyennation au niveau des noeuds pour la visualisation
 RESU=CALC_NO(reuse=RESU,
