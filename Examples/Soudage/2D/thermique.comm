@@ -5,13 +5,13 @@
 #
 #
 #
-#vit= 100./60.	   
-#Xo = 0.
-#Yo = 0.
-#Ro = 3.
-#def gaussien(X,Y,t,FY):
-#     Q=FY*exp(-((X-vit*t-Xo)**2./Ro**2+((Y-Yo)**2./Ro**2.))/3.)/3.1/Ro**2.
-#     return Q
+vit= 100./60.	   
+Xo = 20.
+Yo = 0.
+Ro = 3.
+def gaussien(X,Y,t,FY):
+     Q=FY*exp(-((X-vit*t-Xo)**2./Ro**2+((Y-Yo)**2./Ro**2.))/3.)/3.1/Ro**2.
+     return Q
 #------------------------------------------------------------------
 #                       CALCUL ASTER
 #-------------------------------------------------------------------
@@ -43,9 +43,8 @@ MODELE=AFFE_MODELE(MAILLAGE=MA,
 # Affectation du materiau a notr plaque
 
 MAT=AFFE_MATERIAU(MAILLAGE=MA,
-                  AFFE=_F(GROUP_MA='TOUT',
+                  AFFE=_F(TOUT='OUI',
                           MATER=ACIER_T,),);
-
 
 # Definition d une formule pour calcul du flux gaussien
 
@@ -59,7 +58,7 @@ aussien1 = FORMULE(VALE='gaussien(X,Y,INST,3000.)',
 # Utilisation de la formule dans un chargement de thermique
 
 FLUTHER=AFFE_CHAR_THER_F(MODELE=MODELE,
-                         SOURCE=_F(GROUP_MA='TOUT',
+                         SOURCE=_F(GROUP_MA='Fin',
                                    SOUR=aussien1,),);
 
 # Calcul thermique transitoire
@@ -84,3 +83,4 @@ IMPR_RESU(MODELE=MODELE,
                   NOM_CHAM='TEMP',),);
 
 FIN();
+#CHECKSUM:02a33795a166939d38f88992b293e78c  -:FIN CHECKSUM

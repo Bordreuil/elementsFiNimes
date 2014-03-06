@@ -1,0 +1,63 @@
+
+DEBUT();
+
+MA=LIRE_MAILLAGE(FORMAT='MED',);
+
+MATER=DEFI_MATERIAU(ELAS=_F(E=196200.0,
+                            NU=0.3,
+                            RHO=10000.0,),);
+
+CHMAT=AFFE_MATERIAU(MAILLAGE=MA,
+                    AFFE=_F(TOUT='OUI',
+                            MATER=MATER,),);
+
+MODELE=AFFE_MODELE(MAILLAGE=MA,
+                   AFFE=_F(GROUP_MA=('TOUT','Sect1',),
+                           PHENOMENE='MECANIQUE',
+                           MODELISATION='DKT',),);
+
+#MACR_INFO_MAIL(MAILLAGE=MA,);
+
+CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
+                     COQUE=_F(GROUP_MA='TOUT',
+                              EPAIS=2.,),);
+
+CHARGE=AFFE_CHAR_MECA(VERI_NORM='NON',
+                      MODELE=MODELE,
+                      DDL_IMPO=_F(GROUP_NO='Encastre',
+                                  DX=0.0,
+                                  DY=0.0,
+                                  DZ=0.0,
+                                  DRX=0.0,
+                                  DRY=0.0,
+                                  DRZ=0.0,),
+                      FORCE_ARETE=_F(GROUP_MA='Sect1',
+                                     FX=1.,),);
+
+RESU1=MECA_STATIQUE(MODELE=MODELE,
+                    CHAM_MATER=CHMAT,
+                    CARA_ELEM=CAREL,
+                    EXCIT=_F(CHARGE=CHARGE,),
+                    SOLVEUR=_F(METHODE='MULT_FRONT',
+                               RENUM='METIS',
+                               NPREC=12,
+                               STOP_SINGULIER='OUI',),);
+
+RESU1=CALC_ELEM(reuse =RESU1,
+                MODELE=MODELE,
+                RESULTAT=RESU1,
+                REPE_COQUE=(_F(NIVE_COUCHE='SUP',),
+                            _F(NIVE_COUCHE='MOY',),),
+                OPTION='SIEF_ELNO',);
+
+RESU1=CALC_NO(reuse =RESU1,
+              RESULTAT=RESU1,
+              OPTION=('SICO_NOEU','SIEF_NOEU',),);
+
+IMPR_RESU(MODELE=MODELE,
+          FORMAT='MED',
+          RESU=_F(RESULTAT=RESU1,
+                  NOM_CHAM=('DEPL','SICO_NOEU','SIEF_NOEU',),),);
+
+FIN();
+#CHECKSUM:c532ab23673a41c66dcaffc836c7963e  -:FIN CHECKSUM

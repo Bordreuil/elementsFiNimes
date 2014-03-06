@@ -94,11 +94,14 @@ T_RESU=POST_RELEVE_T(ACTION=_F(OPERATION='EXTRACTION',
                                NOM_CHAM='SIGM_NOEU',
                                GROUP_NO='Sym1',
                                TOUT_CMP='OUI',),);
+DEFI_FICHIER( UNITE=25,
+              FICHIER= './contraintes_sym.csv');
 
 IMPR_TABLE(TABLE=T_RESU,
            FORMAT='AGRAF',
            UNITE=25,
            NOM_PARA=('COOR_X','SIYY',),);
 
+LIBERER_FICHIER(UNITE=25);
 FIN();
 #CHECKSUM:a92cf9208bdeac6ff79f76cf0895cedf  -:FIN CHECKSUM

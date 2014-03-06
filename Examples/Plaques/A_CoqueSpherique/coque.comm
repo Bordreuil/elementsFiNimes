@@ -1,0 +1,128 @@
+#
+#	CAS TEST:
+#	Calcul des contraintes dans une coque spherique sous pression
+#	
+#	Un huitieme de la geometrie est modelise.
+#	
+#	Differents groupes sont definis :
+#	  - Groupes de Noeuds:
+#	     - NX, NY, NZ : correspondant aux axes de symmétriques
+#	  - Groupes de Faces:
+#	     - TOUT
+DEBUT();
+
+#
+#	Lecture Maillage 
+#
+MA=LIRE_MAILLAGE(FORMAT='MED',);
+
+
+#
+#	Definition du materiau ici Acier
+#
+MATER=DEFI_MATERIAU(ELAS=_F(E=196200.0,
+                            NU=0.3,
+                            RHO=10000.0,),);
+
+#
+#	Affectation du materiau
+#
+CHMAT=AFFE_MATERIAU(MAILLAGE=MA,
+                    AFFE=_F(TOUT='OUI',
+                            MATER=MATER,),);
+
+#
+#	Modelisation mecanique, on suppose
+#	que la geometrie a ete modelise par des 
+#	triangles
+MODELE=AFFE_MODELE(MAILLAGE=MA,
+                   AFFE=_F(TOUT='OUI',
+                           PHENOMENE='MECANIQUE',
+                           MODELISATION='DKT',),);
+
+#
+#	Definition des caracteristiques elementaires
+#	pour les plaques : epaisseur
+CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
+                     COQUE=_F(GROUP_MA='TOUT',
+                              EPAIS=5.,),);
+
+#
+#	Definition et Affectation des conditions aux limites
+#
+CHARGE=AFFE_CHAR_MECA(VERI_NORM='NON',
+                      MODELE=MODELE,
+                      DDL_IMPO=(_F(GROUP_NO='NX',
+                                   DX=0.0,),
+                                _F(GROUP_NO='NY',
+                                   DY=0.0,),
+                                _F(GROUP_NO='NZ',
+                                   DZ=0,),),
+                      FORCE_COQUE=_F(TOUT='OUI',
+                                     PRES=2.,),);
+
+#
+#	Resolution statique
+#
+RESU1=MECA_STATIQUE(MODELE=MODELE,
+                    CHAM_MATER=CHMAT,
+                    CARA_ELEM=CAREL,
+                    EXCIT=_F(CHARGE=CHARGE,),
+                    OPTION='SANS',
+                    SOLVEUR=_F(METHODE='MULT_FRONT',
+                               RENUM='METIS',
+                               NPREC=12,
+                               STOP_SINGULIER='OUI',),);
+
+#
+#	Extraction des resultats avant impression
+#	Pour les plaques les contraintes de flexion et de
+#	membrane ne sont pas directement donnees, il faut d abord
+#	extraire les contraintes sur le NIVE_COUCHE moyenne (Ligne neutre)
+#	puis sur la couche superieure
+#	On remarque que les resultats sont stockees dans deux resultats
+#	differents NEUTRE et SUP qu'on pourra combiner dans 
+#	paraview pour extraire la contrainte de membrane
+#
+# -------------------------------------------------
+#	Definition du resultat sur la surface moyenne
+#
+NEUTRE=CALC_ELEM(
+                RESULTAT=RESU1,
+                REPE_COQUE=_F(GROUP_MA='TOUT',
+                              NUME_COUCHE=1,
+                              NIVE_COUCHE='MOY',),
+                OPTION='SIGM_ELNO',);
+
+NEUTRE=CALC_NO(reuse =NEUTRE,
+              RESULTAT=NEUTRE,
+              OPTION='SIGM_NOEU',);
+
+# -------------------------------------------------
+#	Definition du resultat sur la surface superieure
+#
+SUP=CALC_ELEM(RESULTAT=RESU1,
+              REPE_COQUE=_F(GROUP_MA='TOUT',
+                            NUME_COUCHE=1,
+                            NIVE_COUCHE='SUP',),
+              OPTION='SIGM_ELNO',);
+
+
+
+SUP=CALC_NO(reuse =SUP,
+            RESULTAT=SUP,
+            OPTION='SIGM_NOEU',);
+#
+#	Impression des resultats au format MED. 
+#
+IMPR_RESU(FORMAT='MED',
+          UNITE=80,
+          RESU=(_F(MAILLAGE=MA,
+                   RESULTAT=NEUTRE,
+                   NOM_CHAM=('SIGM_NOEU',),),
+                _F(MAILLAGE=MA,
+                   RESULTAT=SUP,
+		   NOM_CHAM=('SIGM_NOEU',)),),);
+
+FIN();
+#CHECKSUM:8b34348a84a240d4cdd4e9aec452279d  -:FIN CHECKSUM
