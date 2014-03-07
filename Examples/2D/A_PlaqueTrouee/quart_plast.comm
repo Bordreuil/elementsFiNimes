@@ -130,7 +130,8 @@ T_RESU=POST_RELEVE_T(ACTION=_F(OPERATION='EXTRACTION',
                                NOM_CHAM='SIEF_NOEU',
                                GROUP_NO='Sym1',
                                TOUT_CMP='OUI',),);
-
+DEFI_FICHIER(UNITE=25,
+	      FICHIER='./plast.csv');
 IMPR_TABLE(TABLE=T_RESU,
            FORMAT='AGRAF',
            UNITE=25,

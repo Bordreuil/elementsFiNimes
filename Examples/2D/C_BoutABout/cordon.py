@@ -67,9 +67,10 @@ geompy.UnionIDs(GTole2, [19])
 Encastre = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
 geompy.UnionIDs(Encastre, [9])
 Anal = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
-geompy.UnionIDs(Effort, [25])
+geompy.UnionIDs(Anal, [25])
 Anali = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
 geompy.UnionIDs(Anali, [23])
+
 Effort = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
 geompy.UnionIDs(Effort, [29])
 

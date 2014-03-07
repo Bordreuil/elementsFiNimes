@@ -9,9 +9,12 @@ vit= 100./60.
 Xo = 20.
 Yo = 0.
 Ro = 3.
+tmaintien = 3.
 def gaussien(X,Y,t,FY):
-     Q=FY*exp(-((X-vit*t-Xo)**2./Ro**2+((Y-Yo)**2./Ro**2.))/3.)/3.1/Ro**2.
-     return Q
+       Q=FY*exp(-((X-vit*(t-tmaintien)-Xo)**2./Ro**2+((Y-Yo)**2./Ro**2.))/3.)/3.1/Ro**2.
+       if(t< tmaintien):
+        	 Q=FY*exp(-((X-Xo)**2./Ro**2+((Y-Yo)**2./Ro**2.))/3.)/3.1/Ro**2.   
+       return Q
 #------------------------------------------------------------------
 #                       CALCUL ASTER
 #-------------------------------------------------------------------
@@ -24,14 +27,14 @@ MA=LIRE_MAILLAGE(UNITE=20,
 # Definition du materiau (ACIER 16MND5)
 # Les unites ont ete bascule pour que l unite de longueur soit le mm
 
-ACIER_T=DEFI_MATERIAU(THER=_F(LAMBDA=16.5,
+ACIER_T=DEFI_MATERIAU(THER=_F(LAMBDA=0.0165,
                               RHO_CP=0.0039,),);
 
 # Definition des instants de calcul pour une analyse non lineraire
 
 L_INST=DEFI_LIST_REEL(DEBUT=0.0,
-                      INTERVALLE=_F(JUSQU_A=24.0,
-                                    NOMBRE=24,),);
+                      INTERVALLE=_F(JUSQU_A=40.0,
+                                    NOMBRE=80,),);
 
 # Affectation du modele de thermique
 
@@ -48,14 +51,16 @@ MAT=AFFE_MATERIAU(MAILLAGE=MA,
 
 # Definition d une formule pour calcul du flux gaussien
 
-aussien1 = FORMULE(VALE='gaussien(X,Y,INST,3000.)',
+aussien1 = FORMULE(VALE='gaussien(X,Y,INST,300.)',
                    NOM_PARA=('X','Y','INST',),);
 
-#ECH =AFFE_CHAR_THER(MODELE=MODELE,
-#                    ECHANGE=_F( GROUP_MA = 'GM7', 
-#		     		 COEF_H = 30.0e-6,
-#                                    TEMP_EXT = 260.0),);
+ECH=AFFE_CHAR_THER(MODELE=MODELE,
+                   ECHANGE=_F(TOUT='OUI',
+                              COEF_H=30.0e-6,
+                              TEMP_EXT=20.0,),);
+
 # Utilisation de la formule dans un chargement de thermique
+# La source de chaleur correspond au produit UxI/epaisseur de la plaque
 
 FLUTHER=AFFE_CHAR_THER_F(MODELE=MODELE,
                          SOURCE=_F(GROUP_MA='Fin',
@@ -66,7 +71,8 @@ FLUTHER=AFFE_CHAR_THER_F(MODELE=MODELE,
 
 TEMP=THER_LINEAIRE(MODELE=MODELE,
                    CHAM_MATER=MAT,
-                   EXCIT=_F(CHARGE=FLUTHER,),
+                   EXCIT=(_F(CHARGE=FLUTHER,),
+                          _F(CHARGE=ECH,),),
                    INCREMENT=_F(LIST_INST=L_INST,),
                    ETAT_INIT=_F(VALE=20.E0,),
                    SOLVEUR=_F(METHODE='MULT_FRONT',
@@ -74,13 +80,10 @@ TEMP=THER_LINEAIRE(MODELE=MODELE,
                               NPREC=8,
                               STOP_SINGULIER='OUI',),);
 
-# POST_TRAITEMENT POUR OBTENIR LES FLUX AUX NOEUDS ET
-# L'INDICATEUR D'ERREUR THERMIQUE EN RESIDU.
-
 IMPR_RESU(MODELE=MODELE,
           FORMAT='MED',
           RESU=_F(RESULTAT=TEMP,
                   NOM_CHAM='TEMP',),);
 
 FIN();
-#CHECKSUM:02a33795a166939d38f88992b293e78c  -:FIN CHECKSUM
+#CHECKSUM:f787b868d800ed3649c4dd22d1c965e9  -:FIN CHECKSUM
