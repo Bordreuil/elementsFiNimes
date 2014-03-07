@@ -4,7 +4,7 @@
 ### This file is generated automatically by SALOME v6.6.0 with dump python functionality
 ###
 
-import sys
+import sys,os
 import salome
 
 salome.salome_init()
@@ -12,7 +12,7 @@ theStudy = salome.myStudy
 
 import salome_notebook
 notebook = salome_notebook.notebook
-sys.path.append('.')
+sys.path.append(os.getcwd())
 ###
 ### GEOM component
 ###

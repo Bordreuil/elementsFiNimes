@@ -4,7 +4,7 @@
 ### This file is generated automatically by SALOME v6.6.0 with dump python functionality
 ###
 
-import sys
+import sys,os
 import salome
 
 salome.salome_init()
@@ -12,7 +12,7 @@ theStudy = salome.myStudy
 
 import salome_notebook
 notebook = salome_notebook.notebook
-
+sys.path.append(os.getcwd())
 ###
 ### GEOM component
 ###
@@ -63,18 +63,39 @@ geompy.UnionIDs(GTole1, [2])
 
 Cordon_1 = geompy.CreateGroup(Joint, geompy.ShapeType["FACE"])
 geompy.UnionIDs(Cordon_1, [12])
-GTole2 = geompy.CreateGroup(Joint, geompy.ShapeType["FACE"])
-geompy.UnionIDs(GTole2, [19])
+Tole2 = geompy.CreateGroup(Joint, geompy.ShapeType["FACE"])
+geompy.UnionIDs(Tole2, [19])
 Encastre = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
 geompy.UnionIDs(Encastre, [9])
 Effort = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
 geompy.UnionIDs(Effort, [25])
 Anal = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
-geompy.UnionIDs(Anal, [25])
+geompy.UnionIDs(Anal, [23])
 Anali = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
-geompy.UnionIDs(Anali, [23])
+geompy.UnionIDs(Anali, [21])
 Effort = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
-geompy.UnionIDs(Effort, [29])
+geompy.UnionIDs(Effort, [27])
+
+
+# Encastre = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
+# geompy.UnionIDs(Encastre, [9])
+# geomObj_6 = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
+# geompy.UnionIDs(geomObj_6, [25])
+# geomObj_7 = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
+# geompy.UnionIDs(geomObj_7, [25])
+# geomObj_8 = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
+# geompy.UnionIDs(geomObj_8, [23])
+# geomObj_9 = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
+# geompy.UnionIDs(geomObj_9, [29])
+# Anal = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
+# geompy.UnionIDs(Anal, [23])
+# Anali = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
+# geompy.UnionIDs(Anali, [21])
+# Effort = geompy.CreateGroup(Joint, geompy.ShapeType["EDGE"])
+# geompy.UnionIDs(Effort, [27])
+
+
+
 geompy.addToStudy( Sommet_1, 'Sommet_1' )
 geompy.addToStudy( Sommet_2, 'Sommet_2' )
 geompy.addToStudy( Sommet_3, 'Sommet_3' )
@@ -101,7 +122,7 @@ geompy.addToStudy( Tole2, 'Tole2' )
 geompy.addToStudy( Joint, 'Joint' )
 geompy.addToStudyInFather( Joint, GTole1, 'Tole1' )
 geompy.addToStudyInFather( Joint, Cordon_1, 'Cordon' )
-geompy.addToStudyInFather( Joint, GTole2, 'GTole2' )
+geompy.addToStudyInFather( Joint, Tole2, 'Tole2' )
 geompy.addToStudyInFather( Joint, Encastre, 'Encastre' )
 geompy.addToStudyInFather( Joint, Effort, 'Effort' )
 geompy.addToStudyInFather( Joint, Anal, 'Anal' )
