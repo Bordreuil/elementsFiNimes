@@ -12,7 +12,7 @@ theStudy = salome.myStudy
 
 import salome_notebook
 notebook = salome_notebook.notebook
-
+sys.path.append('.')
 ###
 ### GEOM component
 ###
