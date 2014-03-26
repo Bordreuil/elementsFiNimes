@@ -1,0 +1,107 @@
+# 
+#
+#	Modelisation  mecanique simplifie
+#	d une operation de soudage
+#
+#
+#
+#------------------------------------------------------------------
+#                       CALCUL ASTER
+#-------------------------------------------------------------------
+
+POURSUITE();
+
+MA2=LIRE_MAILLAGE(UNITE=20,FORMAT='MED');
+
+# Definition des instants de calcul pour une analyse non lineraire
+
+LINST=DEFI_LIST_REEL(DEBUT=0.0,
+                      INTERVALLE=_F(JUSQU_A=20.0,
+                                    NOMBRE=80,),);
+
+
+
+
+MECA=AFFE_MODELE(MAILLAGE=MA2,
+                   VERIF='MAILLE',
+                   AFFE=_F(TOUT='OUI',
+                           PHENOMENE='MECANIQUE',
+                           MODELISATION='C_PLAN',),);
+
+PROJ_TH=PROJ_CHAMP(RESULTAT=TEMP,
+                   MODELE_1=MODELE,
+                   MODELE_2=MECA,
+                   VIS_A_VIS=_F(TOUT_1='OUI',
+                                TOUT_2='OUI',),);
+#                                CAS_FIGURE='3D',),);
+
+# Definition de la courbe de traction
+
+CTRA=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(2.185E-3,437.,
+                          9.185E-3,437.,
+                          0.010235,447.,
+                          0.015385,477.,
+                          0.020485,497.,
+                          ),
+                    PROL_DROITE='CONSTANT',
+                    PROL_GAUCHE='CONSTANT',);
+
+# Affectation des proprietes materiau 
+
+mate=DEFI_MATERIAU(ELAS=_F(E=180000.0,
+                          NU=0.3,
+                          ALPHA=5e-06,),
+                  TRACTION=_F(SIGM=CTRA,),);
+
+CME1=AFFE_MATERIAU(MAILLAGE=MA2,
+                    AFFE=_F(TOUT='OUI',
+                            MATER=mate,),
+                    AFFE_VARC=_F(TOUT='OUI',
+                                 NOM_VARC='TEMP',
+                                 EVOL=PROJ_TH,
+                                 VALE_REF=20.,),);
+
+CHARM=AFFE_CHAR_MECA(MODELE=MECA,
+                     DDL_IMPO=(_F(GROUP_NO='Bride',
+                                  DX=0.,
+                                  DY=0.,),
+                               _F(GROUP_NO='Sym',
+                                  DY=0.,),),);
+
+
+
+DU=STAT_NON_LINE(MODELE=MECA,
+                 CHAM_MATER=CME1,
+                 EXCIT=_F(CHARGE=CHARM,),
+                 COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
+		 NEWTON=_F(REAC_INCR=1,
+                               MATRICE='TANGENTE',
+                               REAC_ITER=1,
+                               REAC_ITER_ELAS=1),
+ 	         CONVERGENCE=_F(ITER_GLOB_MAXI=20,),
+                 INCREMENT=_F(LIST_INST=LINST,),);
+
+# POST_TRAITEMENT POUR OBTENIR LES FLUX AUX NOEUDS ET
+# L'INDICATEUR D'ERREUR THERMIQUE EN RESIDU.
+
+DU=CALC_ELEM(reuse =DU,
+             RESULTAT=DU,
+             TYPE_OPTION='TOUTES',
+             OPTION=('SIEF_ELNO','VARI_ELNO','SIEQ_ELNO'),);
+
+DU=CALC_NO(reuse =DU,
+           RESULTAT=DU,
+           OPTION=('SIEF_NOEU','VARI_NOEU','SIEQ_NOEU'));
+
+IMPR_RESU(MODELE=MECA,
+          FORMAT='MED',
+          UNITE=80,
+          RESU=(_F(RESULTAT=DU,
+                   NOM_CHAM=('SIEF_NOEU','SIEQ_NOEU','VARI_NOEU'),),),);
+#                _F(RESULTAT=TEMP,
+#                   NOM_CHAM='TEMP',),),);
+
+FIN();
+#CHECKSUM:0869e7cc000957d504e49f562041e2fc  -:FIN CHECKSUM

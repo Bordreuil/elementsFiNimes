@@ -10,14 +10,16 @@ Xo = 20.
 Yo = 0.
 Ro = 3.
 tmaintien = 3.
-tfin      = 200.
+tsoudage  = 300.
+tfin      = 600.
+
 def gaussien(X,Y,t,FY):
-        Q=FY*exp(-((X-vit*(t-tmaintien)-Xo)**2./Ro**2+((Y-Yo)**2./Ro**2.))/3.)/3.1/Ro**2.
-        if(t< tmaintien):
-         	 Q=FY*exp(-((X-Xo)**2./Ro**2+((Y-Yo)**2./Ro**2.))/3.)/3.1/Ro**2.
-        if(t > tfin):
-        	    Q=0.
-        return Q
+      Q=FY*exp(-3.*((X-vit*(t-tmaintien)-Xo)**2./Ro**2+(Y-Yo)**2./Ro**2.))
+      if(t< tmaintien):
+        	 Q=FY*exp(-3.*((X-Xo)**2./Ro**2+(Y-Yo)**2./Ro**2.))   
+      if(t>tsoudage):
+	Q=0.
+      return Q
 #------------------------------------------------------------------
 #                       CALCUL ASTER
 #-------------------------------------------------------------------
@@ -36,10 +38,10 @@ ACIER_T=DEFI_MATERIAU(THER=_F(LAMBDA=0.0165,
 # Definition des instants de calcul pour une analyse non lineraire
 
 L_INST=DEFI_LIST_REEL(DEBUT=0.0,
-                      INTERVALLE=(_F(JUSQU_A=200.0,
-                                     NOMBRE=200,),
-                                  _F(JUSQU_A=400,
-                                     NOMBRE=50,),),);
+                      INTERVALLE=(_F(JUSQU_A=tsoudage,
+                                    NOMBRE=300,),
+				  _F(JUSQU_A=tfin,
+                                    NOMBRE=40,),),);
 
 # Affectation du modele de thermique
 
@@ -56,13 +58,13 @@ MAT=AFFE_MATERIAU(MAILLAGE=MA,
 
 # Definition d une formule pour calcul du flux gaussien
 
-aussien1 = FORMULE(VALE='gaussien(X,Y,INST,200.)',
+aussien1 = FORMULE(VALE='gaussien(X,Y,INST,17.)',
                    NOM_PARA=('X','Y','INST',),);
 
 ECH=AFFE_CHAR_THER(MODELE=MODELE,
                    ECHANGE=_F(TOUT='OUI',
-                              COEF_H=30.0e-6,
-                              TEMP_EXT=20.0,),);
+                              COEF_H   = 20.0e-6,
+                              TEMP_EXT = 20.0,),);
 
 # Utilisation de la formule dans un chargement de thermique
 # La source de chaleur correspond au produit UxI/epaisseur de la plaque
@@ -91,4 +93,4 @@ IMPR_RESU(MODELE=MODELE,
                   NOM_CHAM='TEMP',),);
 
 FIN();
-#CHECKSUM:c88903db3d12ddd44345179c38e37663  -:FIN CHECKSUM
+#CHECKSUM:f787b868d800ed3649c4dd22d1c965e9  -:FIN CHECKSUM

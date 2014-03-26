@@ -36,7 +36,7 @@ distanceEntreJoint = 2000.
 hauteurTreillis    = 1500.
 largeurTreillis    = 1500.
 hauteurAncrageCable = 7500.
-nbreDeJoint        = 20
+nbreDeJoint        = 40
 Sommets            = []
 Lignes             = []
 for i in arange(0,nbreDeJoint+1,1):
