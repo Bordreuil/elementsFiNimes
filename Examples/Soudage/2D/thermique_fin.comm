@@ -1,17 +1,20 @@
 # 
 #
-#	Modelisation thermo mecanique simplifie
-#	d une operation de soudage
+#	Modelisation thermique simplifiee
+#	d une ligne de fusion
 #
 #
 #
-vit= 100./60.	   
-Xo = 20.
-Yo = 0.
-Ro = 3.
-tmaintien = 3.
-tsoudage  = 300.
-tfin      = 600.
+# Parametres de soudage
+vit= 100./60.	   # Vitesse de soudage
+Xo = 20.           # position initiale de la toche en X
+Yo = 0.            # position initiale de la torche en Y
+Ro = 3.            # Rayon pour le flux de chaleur
+tmaintien = 3.     # temps de mainitien
+tsoudage  = 460./vit+tmaintien # temps de soudage
+tfin      = 600.               # temps de fin de l analyse
+incrS     = int(tsoudage)      # Nombre d increment pour le calcul
+	    		       # pour le soudage
 
 def gaussien(X,Y,t,FY):
       Q=FY*exp(-3.*((X-vit*(t-tmaintien)-Xo)**2./Ro**2+(Y-Yo)**2./Ro**2.))
@@ -36,10 +39,10 @@ ACIER_T=DEFI_MATERIAU(THER=_F(LAMBDA=0.0165,
                               RHO_CP=0.0039,),);
 
 # Definition des instants de calcul pour une analyse non lineraire
-
+# On definit deux intervalles
 L_INST=DEFI_LIST_REEL(DEBUT=0.0,
                       INTERVALLE=(_F(JUSQU_A=tsoudage,
-                                    NOMBRE=300,),
+                                    NOMBRE=incrS,),
 				  _F(JUSQU_A=tfin,
                                     NOMBRE=40,),),);
 
@@ -57,17 +60,30 @@ MAT=AFFE_MATERIAU(MAILLAGE=MA,
                           MATER=ACIER_T,),);
 
 # Definition d une formule pour calcul du flux gaussien
-
-aussien1 = FORMULE(VALE='gaussien(X,Y,INST,17.)',
+# 25. correspond à Fy=rendement x U x I / 3/sqrt(Pi) / Ro /ep 
+# ou ep est l epaisseur de la plaque
+# ici, on considere 30A/mm et 12V. Le rendement est suppose de 1
+# voir ouvrage simulation du soudage pour plus de precision
+#      Goldak ou Bergheau
+aussien1 = FORMULE(VALE='gaussien(X,Y,INST,22.5)',
                    NOM_PARA=('X','Y','INST',),);
 
+
+# Introduction de l echange entre l air et la plaque
+# q = coef_h ( T_piece - Temp_ext )
+# ici coef_h = 20e-6 est fort car on considere l echange sur les 
+#                        deux cotes de la plaque 
 ECH=AFFE_CHAR_THER(MODELE=MODELE,
                    ECHANGE=_F(TOUT='OUI',
                               COEF_H   = 20.0e-6,
                               TEMP_EXT = 20.0,),);
 
 # Utilisation de la formule dans un chargement de thermique
-# La source de chaleur correspond au produit UxI/epaisseur de la plaque
+
+# LE flux thermique est applique en tant que terme source au niveau 
+# de l'equation de la chaleur. La source de chaleur est appliquee sur
+# la partie du maillage en interaction avec l'arc. Dans le maillage
+# un groupe 'Fin' est defini et c'est sur cette zone qu'on calcul le flux
 
 FLUTHER=AFFE_CHAR_THER_F(MODELE=MODELE,
                          SOURCE=_F(GROUP_MA='Fin',
@@ -87,6 +103,8 @@ TEMP=THER_LINEAIRE(MODELE=MODELE,
                               NPREC=8,
                               STOP_SINGULIER='OUI',),);
 
+# Impression des resultats: pour ce cas, uniquement la temperature est sortie
+# dans le fichier rmed
 IMPR_RESU(MODELE=MODELE,
           FORMAT='MED',
           RESU=_F(RESULTAT=TEMP,
