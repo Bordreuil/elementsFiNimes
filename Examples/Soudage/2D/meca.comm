@@ -8,13 +8,16 @@
 #------------------------------------------------------------------
 #                       CALCUL ASTER
 #-------------------------------------------------------------------
-
+# Pour poursuivre un calcul, il faut lui le dossier .base du resultat
+# que l'on veut poursuivre. cf figure astk_poursuite.png
 POURSUITE();
+
+# Lecture du maillage
 
 MA2=LIRE_MAILLAGE(UNITE=20,FORMAT='MED');
 
 # Definition des instants de calcul pour une analyse non lineraire
-
+# t_soudage et incrS sont definis dans thermique_fin.comm
 LINST=DEFI_LIST_REEL(DEBUT=0.0,
                       INTERVALLE=_F(JUSQU_A=tsoudage,
                                     NOMBRE=incrS*2,),);
@@ -28,6 +31,10 @@ MECA=AFFE_MODELE(MAILLAGE=MA2,
                            PHENOMENE='MECANIQUE',
                            MODELISATION='C_PLAN',),);
 
+# Projection des champs du modele MODELE provenant de themique_fin.comm
+# sur le modele de mecanique MECA
+# Dans l affectation du modele le maillage est defini, il est donc envisageable
+# d'avoir deux maillages et de projeter un resultat sur l'autre maillage.
 PROJ_TH=PROJ_CHAMP(RESULTAT=TEMP,
                    MODELE_1=MODELE,
                    MODELE_2=MECA,
@@ -48,8 +55,10 @@ CTRA=DEFI_FONCTION(
                     PROL_DROITE='CONSTANT',
                     PROL_GAUCHE='CONSTANT',);
 
+# Dependance du module d Young en fonction de la temperature
 YOUNG=DEFI_FONCTION(     NOM_PARA='TEMP',
                             PROL_DROITE='CONSTANT',
+      			    PROL_GAUCHE='CONSTANT',
                                   VALE=(  0.,  180000.,
                                          900.,  150000.,
 					 1100., 80000.,
@@ -62,13 +71,18 @@ POISSON = DEFI_CONSTANTE( VALE=0.3)
 DILAT   = DEFI_CONSTANTE( VALE=5.e-6)
 
 # Affectation des proprietes materiau 
-
+# L elasticite est une fonction de la temperature mot cle ELAS_FO
+#   on rentre ensuite les fonctions definies precedemment
 mate=DEFI_MATERIAU(ELAS_FO=_F(E=YOUNG,
                           NU=POISSON,
                           ALPHA=DILAT,
 			  TEMP_DEF_ALPHA=20.),
                   TRACTION=_F(SIGM=CTRA,),);
 
+# Affectation des proprietes materiaux
+# a tout le maillage
+# Le champ de temperature est une variable qu il faut 
+# affecte au niveau de l affectation du materiau
 CME1=AFFE_MATERIAU(MAILLAGE=MA2,
                     AFFE=_F(TOUT='OUI',
                             MATER=mate,),
@@ -77,6 +91,7 @@ CME1=AFFE_MATERIAU(MAILLAGE=MA2,
                                  EVOL=PROJ_TH,
                                  VALE_REF=20.,),);
 
+# Definition du chargement mecanique
 CHARM=AFFE_CHAR_MECA(MODELE=MECA,
                      DDL_IMPO=(_F(GROUP_NO='Bride',
                                   DX=0.,
@@ -85,7 +100,17 @@ CHARM=AFFE_CHAR_MECA(MODELE=MECA,
                                   DY=0.,),),);
 
 
-
+# Resolution statique non lineaire
+# Pour la resolution du probleme non lineaire,
+# on resoud le problemen en considerant un probleme
+# plastique avec ecrouissage isotrope donne par la courbe de traction : 
+# VMIS_ISOT_TRAC 
+#
+# Pour la resolution non lineaire, on resoud la methode de Newton
+# en calculant la matrice tangente a chaque iteration
+# INCREMENT est le mot cle pour controle les instants de calcul
+# si, le pas de temps entre deux increments est trop long, on peut 
+# avoir non convergence du calcul
 DU=STAT_NON_LINE(MODELE=MECA,
                  CHAM_MATER=CME1,
                  EXCIT=_F(CHARGE=CHARM,),
