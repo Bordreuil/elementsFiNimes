@@ -1,0 +1,65 @@
+# MODIF  DATE 17/02/2009   AUTEUR SELLENET N.SELLENET 
+# TITRE PLAQUE RECTANGULAIRE EN APPUI SIMPLE SUR LES BORDS
+
+DEBUT();
+
+MA=LIRE_MAILLAGE(FORMAT='MED',);
+
+MO=AFFE_MODELE(MAILLAGE=MA,
+               AFFE=_F(GROUP_MA='Plaque',
+                       PHENOMENE='MECANIQUE',
+                       MODELISATION='DKT',),);
+
+CARELEM=AFFE_CARA_ELEM(MODELE=MO,
+                       COQUE=_F(GROUP_MA='Plaque',
+                                EPAIS=0.002,),);
+
+MAT=DEFI_MATERIAU(ELAS=_F(E=210000.e6,
+                          NU=0.3,
+                          RHO=7800.,),);
+
+CHMAT=AFFE_MATERIAU(MAILLAGE=MA,
+                    AFFE=_F(TOUT='OUI',
+                            MATER=MAT,),);
+
+CLIM=AFFE_CHAR_MECA(MODELE=MO,
+                    DDL_IMPO=_F(GROUP_NO='BORD',
+                                DX=0.0,
+                                DY=0.0,
+                                DZ=0.0,),);
+
+MATELER=CALC_MATR_ELEM(OPTION='RIGI_MECA',
+                       MODELE=MO,
+                       CHAM_MATER=CHMAT,
+                       CARA_ELEM=CARELEM,
+                       CHARGE=CLIM,);
+
+MATELEM=CALC_MATR_ELEM(OPTION='MASS_MECA',
+                       MODELE=MO,
+                       CHAM_MATER=CHMAT,
+                       CARA_ELEM=CARELEM,
+                       CHARGE=CLIM,);
+
+NUM=NUME_DDL(MATR_RIGI=MATELER,);
+
+MATASSR=ASSE_MATRICE(MATR_ELEM=MATELER,
+                     NUME_DDL=NUM,);
+
+MATASSM=ASSE_MATRICE(MATR_ELEM=MATELEM,
+                     NUME_DDL=NUM,);
+
+MODES=MODE_ITER_SIMULT(MATR_A=MATASSR,
+                       MATR_B=MATASSM,
+                       METHODE='SORENSEN',
+                       CALC_FREQ=_F(OPTION='PLUS_PETITE',
+                                    NMAX_FREQ=20,),);
+
+IMPR_RESU(FORMAT='MED',
+          RESU=_F(RESULTAT=MODES,
+                  TOUT_CHAM='OUI',),);
+
+FIN();
+
+#
+
+#CHECKSUM:538fab62f3ece97dd9a84f23c1b3939c  -:FIN CHECKSUM
