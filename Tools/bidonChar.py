@@ -115,7 +115,7 @@ def couperVirolePiquage(Piquage,Corps):
     Piquage   = geompy.MakeCompound([Face_8,Face_9])
     return Virole,Piquage
 
-def creerBidon(*args):
+def creerBidon(args):
     Bidon=geompy.MakeCompound(args)
     groups=[]
     for arg in args:
