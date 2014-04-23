@@ -77,18 +77,18 @@ Position = 1300.
 Dbride   = 600.
 
 Piq1          = creerPiquage(Position,H,Alpha,Dp,Dbride)
-Virole,Piq1   = couperVirolePiquage(Piq1,Corps)
+Virole,Piq1   = couperVirolePiquagePos(Piq1,Corps)
 
 Corps  = geompy.MakeCompound([Virole,FondG,FondD])
 
 H        = 1000.
 Dp       = 300.
 Alpha    = -45.
-Position = 800.
+Position = -800.
 Dbride   = 400.
 
 Piq2          = creerPiquage(Position,H,Alpha,Dp,Dbride)
-Virole,Piq2   = couperVirolePiquage(Piq2,Corps)
+Virole,Piq2   = couperVirolePiquageNeg(Piq2,Corps)
 
 Bidon,groupes = creerBidon([FondG,FondD,Virole,Pieds,Piq1,Piq2])
 #-----------------------------------
