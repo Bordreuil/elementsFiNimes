@@ -95,7 +95,7 @@ def couperPiedEtBidon(Pied1,Pied2,Corps):
     Virole = geompy.MakeCompound([ Virole])
     return Virole,Pieds
 
-def creerPiquage(Position,H,Alpha,Dp,Dbride):
+def creerPiquageVirole(Position,H,Alpha,Dp,Dbride):
     Sommet_27   = geompy.MakeVertex(Position, 0, 0)
     Sommet_28   = geompy.MakeVertex(Position, H*cos((Alpha*2*pi)/(360)), H*sin((Alpha*2*pi)/(360)))
     Ligne_22    = geompy.MakeLineTwoPnt(Sommet_27, Sommet_28)
@@ -106,6 +106,26 @@ def creerPiquage(Position,H,Alpha,Dp,Dbride):
     Piquage     =  geompy.MakeCompound([Extrusion_1,Face_13])
     return Piquage
 
+def creerPiquageFondAxialPos(Hauteur,Rayon,Alpha,Dp,Dbride):
+    Sommet_27   = geompy.MakeVertex(0., Rayon*cos((Alpha*2*pi)/(360)), Rayon*sin((Alpha*2*pi)/(360)))
+    Sommet_28   = geompy.MakeVertex(Hauteur, Rayon*cos((Alpha*2*pi)/(360)), Rayon*sin((Alpha*2*pi)/(360)))
+    Ligne_22    = geompy.MakeLineTwoPnt(Sommet_27, Sommet_28)
+    Cercle_1    = geompy.MakeCircle(Sommet_28, Ligne_22, Dp/2)
+    Extrusion_1 = geompy.MakePrismVecH(Cercle_1, Ligne_22, -Hauteur)
+    Cercle_2    = geompy.MakeCircle(Sommet_28, Ligne_22, Dbride/2)
+    Face_13     = geompy.MakeFaceWires([Cercle_1, Cercle_2], 1)
+    Piquage     =  geompy.MakeCompound([Extrusion_1,Face_13])
+    return Piquage
+def creerPiquageFondAxialNeg(Hauteur,Rayon,Alpha,Dp,Dbride):
+    Sommet_27   = geompy.MakeVertex(0., Rayon*cos((Alpha*2*pi)/(360)), Rayon*sin((Alpha*2*pi)/(360)))
+    Sommet_28   = geompy.MakeVertex(Hauteur, Rayon*cos((Alpha*2*pi)/(360)), Rayon*sin((Alpha*2*pi)/(360)))
+    Ligne_22    = geompy.MakeLineTwoPnt(Sommet_27, Sommet_28)
+    Cercle_1    = geompy.MakeCircle(Sommet_28, Ligne_22, Dp/2)
+    Extrusion_1 = geompy.MakePrismVecH(Cercle_1, Ligne_22, Hauteur)
+    Cercle_2    = geompy.MakeCircle(Sommet_28, Ligne_22, Dbride/2)
+    Face_13     = geompy.MakeFaceWires([Cercle_1, Cercle_2], 1)
+    Piquage     =  geompy.MakeCompound([Extrusion_1,Face_13])
+    return Piquage
 def couperVirolePiquagePos(Piquage,Corps):
     Partition_1 = geompy.MakePartition([Corps], [Piquage], [], [], geompy.ShapeType["FACE"], 0, [], 0)
     result = geompy.ExtractShapes(Partition_1, geompy.ShapeType["FACE"], True)
@@ -115,6 +135,62 @@ def couperVirolePiquagePos(Piquage,Corps):
     Piquage   = geompy.MakeCompound([Face_8,Face_9])
     return Virole,Piquage
 
+def couperFondPiquagePosCas1(Piquage,Corps):
+    Partition_1 = geompy.MakePartition([Corps], [Piquage], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+    result = geompy.ExtractShapes(Partition_1, geompy.ShapeType["FACE"], True)
+    Fond = geompy.MakeCompound([result[3],result[6]])
+    Partition_2 = geompy.MakePartition([Piquage], [Corps], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+    [Face_7,Face_8,Face_9] = geompy.ExtractShapes(Partition_2, geompy.ShapeType["FACE"], True)
+    Piquage   = geompy.MakeCompound([Face_8,Face_9])
+    return Fond,Piquage
+
+def couperFondPiquagePosCas2(Piquage,Corps):
+    Partition_1 = geompy.MakePartition([Corps], [Piquage], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+    result = geompy.ExtractShapes(Partition_1, geompy.ShapeType["FACE"], True)
+    Fond = geompy.MakeCompound([result[3],result[5]])
+    Partition_2 = geompy.MakePartition([Piquage], [Corps], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+    [Face_7,Face_8,Face_9] = geompy.ExtractShapes(Partition_2, geompy.ShapeType["FACE"], True)
+    Piquage   = geompy.MakeCompound([Face_8,Face_9])
+    return Fond,Piquage
+
+def couperFondPiquagePosCas3Ou4(Piquage,Corps):
+    Partition_1 = geompy.MakePartition([Corps], [Piquage], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+    result = geompy.ExtractShapes(Partition_1, geompy.ShapeType["FACE"], True)
+    Fond = geompy.MakeCompound([result[3],result[4]])
+    Partition_2 = geompy.MakePartition([Piquage], [Corps], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+    [Face_7,Face_8,Face_9] = geompy.ExtractShapes(Partition_2, geompy.ShapeType["FACE"], True)
+    Piquage   = geompy.MakeCompound([Face_8,Face_9])
+    return Fond,Piquage
+
+def couperFondPiquageNegCas1Ou2(Piquage,Corps):
+    Partition_1 = geompy.MakePartition([Corps], [Piquage], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+    result = geompy.ExtractShapes(Partition_1, geompy.ShapeType["FACE"], True)
+    Fond = geompy.MakeCompound([result[0],result[3]])
+    Partition_2 = geompy.MakePartition([Piquage], [Corps], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+    [Face_7,Face_8,Face_9] = geompy.ExtractShapes(Partition_2, geompy.ShapeType["FACE"], True)
+    Piquage   = geompy.MakeCompound([Face_7,Face_8])
+    return Fond,Piquage
+
+def couperFondPiquagePosCas3(Piquage,Corps):
+    Partition_1 = geompy.MakePartition([Corps], [Piquage], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+    result = geompy.ExtractShapes(Partition_1, geompy.ShapeType["FACE"], True)
+    Fond = geompy.MakeCompound([result[2],result[3]])
+    Partition_2 = geompy.MakePartition([Piquage], [Corps], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+    [Face_7,Face_8,Face_9] = geompy.ExtractShapes(Partition_2, geompy.ShapeType["FACE"], True)
+    Piquage   = geompy.MakeCompound([Face_7,Face_8])
+    return Fond,Piquage
+
+def couperFondPiquagePosCas4(Piquage,Corps):
+    Partition_1 = geompy.MakePartition([Corps], [Piquage], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+    result = geompy.ExtractShapes(Partition_1, geompy.ShapeType["FACE"], True)
+    Fond = geompy.MakeCompound([result[1],result[2]])
+    Partition_2 = geompy.MakePartition([Piquage], [Corps], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+    [Face_7,Face_8,Face_9] = geompy.ExtractShapes(Partition_2, geompy.ShapeType["FACE"], True)
+    Piquage   = geompy.MakeCompound([Face_7,Face_8])
+    return Fond,Piquage
+
+
+
 def couperVirolePiquageNeg(Piquage,Corps):
     Partition_1 = geompy.MakePartition([Corps], [Piquage], [], [], geompy.ShapeType["FACE"], 0, [], 0)
     result = geompy.ExtractShapes(Partition_1, geompy.ShapeType["FACE"], True)
@@ -123,6 +199,7 @@ def couperVirolePiquageNeg(Piquage,Corps):
     [Face_7,Face_8,Face_9] = geompy.ExtractShapes(Partition_2, geompy.ShapeType["FACE"], True)
     Piquage   = geompy.MakeCompound([Face_8,Face_9])
     return Virole,Piquage
+
 def creerBidon(args):
     Bidon=geompy.MakeCompound(args)
     groups=[]
