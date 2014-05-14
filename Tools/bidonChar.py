@@ -171,7 +171,7 @@ def couperFondPiquageNegCas1Ou2(Piquage,Corps):
     Piquage   = geompy.MakeCompound([Face_7,Face_8])
     return Fond,Piquage
 
-def couperFondPiquagePosCas3(Piquage,Corps):
+def couperFondPiquageNegCas3(Piquage,Corps):
     Partition_1 = geompy.MakePartition([Corps], [Piquage], [], [], geompy.ShapeType["FACE"], 0, [], 0)
     result = geompy.ExtractShapes(Partition_1, geompy.ShapeType["FACE"], True)
     Fond = geompy.MakeCompound([result[2],result[3]])
@@ -180,7 +180,7 @@ def couperFondPiquagePosCas3(Piquage,Corps):
     Piquage   = geompy.MakeCompound([Face_7,Face_8])
     return Fond,Piquage
 
-def couperFondPiquagePosCas4(Piquage,Corps):
+def couperFondPiquageNegCas4(Piquage,Corps):
     Partition_1 = geompy.MakePartition([Corps], [Piquage], [], [], geompy.ShapeType["FACE"], 0, [], 0)
     result = geompy.ExtractShapes(Partition_1, geompy.ShapeType["FACE"], True)
     Fond = geompy.MakeCompound([result[1],result[2]])

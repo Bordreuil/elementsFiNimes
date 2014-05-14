@@ -98,8 +98,8 @@ Alpha      = 45.
 Dpiquage2  = 300.
 Dpbride2   = 400.
 
-Piq3        = creerPiquageFondAxialPos(Hauteur_P2,R_piquage,Alpha,Dpiquage2,Dpbride2)
-FondD,Piq3  = couperFondPiquagePosCas2(Piq3,Corps)
+Piq3          = creerPiquageFondAxialPos(Hauteur_P2,R_piquage,Alpha,Dpiquage2,Dpbride2)
+FondD,Piq3    = couperFondPiquagePosCas2(Piq3,Corps)
 Corps         = geompy.MakeCompound([Virole,FondG,FondD])
 Alpha         = 135.
 R_piquage     = 300.
