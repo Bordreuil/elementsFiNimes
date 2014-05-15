@@ -1,32 +1,51 @@
-from bidonChar import * 
-
+from bidonChar     import * 
+from bidonCommBase import *
 availablePiquageType = ['Gauche','Droite']
-
+import re
 class geompyObjectInterface:
     def geompyObject(self):
         return self._obj
     def setGeompyObject(self,obj):
         self._obj = obj
-
+    def setBrideObject(self,obj):
+        self._brideObj = obj
+    def brideObject(self):
+        return self._brideObj
 class piquageVirole(geompyObjectInterface):
-    def __init__(self,nom,Hpiquage,Dpiquage,Alpha,Position,Dbride):
+    def __init__(self,nom,Hpiquage,Dpiquage,Alpha,Position,Dbride,epaisseur=2.,epaisseurBride=10.):
         self._nom      = nom
+        num     = re.findall('\d+',nom)[0]
+        self._nomBride = 'Bride'+num
         self._hpiquage = Hpiquage
         self._dpiquage = Dpiquage
         self._alpha    = Alpha
         self._position = Position
         self._dbride   = Dbride
+        self._epaisseur= epaisseur
+        self._epBride  = epaisseurBride
         self.buildGeompyObject()
     def name(self):
         return self._nom
+    def epaisseur(self):
+        return self._epaisseur
+    def epaisseurBride(self):
+        return self._epBride
+    def nameBride(self):
+        return self._nomBride
+    def Alpha(self):
+        return self._alpha
     def buildGeompyObject(self):
-        self.setGeompyObject(creerPiquageVirole(self._position,self._hpiquage,self._alpha,self._dpiquage,self._dbride))
+        piq,bride=creerPiquageVirole(self._position,self._hpiquage,self._alpha,self._dpiquage,self._dbride)
+        self.setGeompyObject(piq)
+        self.setBrideObject(bride)
     def onPositiveSide(self):
         return self._position > 0.
-
+    
 class piquageAxialFond(geompyObjectInterface):
-    def __init__(self,nom,Type,Hauteur,Rpiquage,Alpha,Dpiquage,Dbride):
+    def __init__(self,nom,Type,Hauteur,Rpiquage,Alpha,Dpiquage,Dbride,epaisseur=2.,epBride=10.):
         self._nom      = nom
+        num     = re.findall('\d+',nom)[0]
+        self._nomBride = 'Bride'+num
         if Type in availablePiquageType:
             self._type     = Type
         else:
@@ -40,7 +59,13 @@ class piquageAxialFond(geompyObjectInterface):
         self._alpha    = Alpha
         self._dpiquage = Dpiquage
         self._dbride   = Dbride
+        self._epaisseur= epaisseur
+        self._epBride  = epBride
         self.buildGeompyObject()
+    def epaisseur(self):
+        return self._epaisseur
+    def epaisseurBride(self):
+        return self._epBride
     def RPosition(self):
         return self._rpiquage
     def RPiquage(self):
@@ -53,20 +78,25 @@ class piquageAxialFond(geompyObjectInterface):
         return  self._rpiquage*sin(self._alpha)
     def name(self):
         return self._nom
+    def nameBride(self):
+        return self._nomBride
     def buildGeompyObject(self):
         if self._type == 'Gauche':
-            self.setGeompyObject(creerPiquageFondAxialNeg(self._hauteur,
+            piq,brid =creerPiquageFondAxialNeg(self._hauteur,
                                                           self._rpiquage,
                                                           self._alpha,
                                                           self._dpiquage,
-                                                          self._dbride))
+                                                          self._dbride)
+            self.setGeompyObject(piq)
+            self.setBrideObject(brid)
         if self._type == 'Droite':
-            self.setGeompyObject(creerPiquageFondAxialPos(self._hauteur,
+            piq,brid = creerPiquageFondAxialPos(self._hauteur,
                                                           self._rpiquage,
                                                           self._alpha,
                                                           self._dpiquage,
-                                                          self._dbride))
-
+                                                          self._dbride)
+            self.setGeompyObject(piq)
+            self.setBrideObject(brid)
 
 class bidonFondGRC:
     def __init__(self,Dvirole      = 500.,
@@ -74,7 +104,9 @@ class bidonFondGRC:
                       PositionPieds= 1280.,
                       LargeurPieds = 900.,
                       largeurPieds = 300.,
-                      HauteurPieds = 800.):
+                      HauteurPieds = 800.,
+                      eVirole      = 3.,
+                      eFond        = 3.):
 
         self._Dvirole       = Dvirole
         self._Lvirole       = Lvirole
@@ -82,7 +114,9 @@ class bidonFondGRC:
         self._LargeurPieds  = LargeurPieds
         self._largeurPieds  = largeurPieds
         self._HauteurPieds  = HauteurPieds
- 
+        self._eVirole       = eVirole
+        self._eFond         = eFond
+
         OX                  = geompy.MakeVectorDXDYDZ(1, 0, 0)
         self._Axe           = OX
         Virole,FondG,FondD  = creerViroleEtDeuxGRC(Lvirole,Dvirole,OX)
@@ -185,9 +219,43 @@ class bidonFondGRC:
     def groups(self):
         base=['Virole','FondG','FondD','Pieds']
         piqs = map(lambda x:x.name(),self._piquages)
-        return base+piqs
+        brids = map(lambda x:x.nameBride(),self._piquages)
+        return base+piqs+brids
     def fabriquerBidon(self):
         comps= [self._virole,self._fondG,self._fondD,self._pieds]
         for piq in self._piquages:
             comps.append(piq.geompyObject())
+        for piq in self._piquages:
+            comps.append(piq.brideObject())
         return creerBidon(comps)
+    def genererPointComm(self,nomFichier='bidonos.comm',pression=1.):
+        fid=open(nomFichier,'w')
+        fid.write(bidonCommPart1)
+        msg="_F(GROUP_MA='Virole',EPAIS={0}),\n".format(self._eVirole)
+        fid.write(msg)
+        msg="\t _F(GROUP_MA=('FondG','FondD'),EPAIS={0}),\n".format(self._eFond)
+        fid.write(msg)
+        for piq in self._piquages:
+             X=1.;Y=0.;Z=0.
+             if(isinstance(piq,piquageVirole)):
+                    X=0;Y=cos(piq.Alpha());Z=sin(piq.Alpha())
+             msg="\t\t _F(GROUP_MA='{0}',EPAIS={1},VECTEUR=({2},{3},{4})),\n".format(piq.name(),piq.epaisseur(),X,Y,Z)
+             fid.write(msg)
+        for piq in self._piquages:
+             X=0.;Y=1.;Z=0.
+             if(isinstance(piq,piquageVirole)):
+                    X=1.;Y=0.;Z=0.
+             msg="\t\t _F(GROUP_MA='{0}',EPAIS={1},VECTEUR=({2},{3},{4})),\n".format(piq.nameBride(),piq.epaisseurBride(),X,Y,Z)
+             fid.write(msg)
+        fid.write('));')
+        fid.write(bidonCommPart2)
+        ls=['Virole','FondG','FondD']
+        ls+=map(lambda x:x.name(),self._piquages)
+        msg="\t\t_F(GROUP_MA=("
+        for l in ls:
+            msg+="'{0}',".format(l)
+        msg+="),\nPRES={0}),);\n".format(pression)
+        fid.write(msg)
+        fid.write(bidonCommPart3)
+        fid.close()
+        
