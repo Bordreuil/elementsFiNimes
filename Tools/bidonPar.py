@@ -32,6 +32,8 @@ class piquageVirole(geompyObjectInterface):
         return self._epBride
     def nameBride(self):
         return self._nomBride
+    def Rpiquage(self):
+        return self._dpiquage/2.
     def Alpha(self):
         return self._alpha
     def buildGeompyObject(self):
@@ -146,20 +148,35 @@ class bidonFondGRC:
         Piq2          = piquageVirole(nom,Hpiquage,Dpiquage,Alpha,Position,Dbride)
 
         if Piq2.onPositiveSide():
-            Virole,Piq    = couperVirolePiquagePos(Piq2.geompyObject(),self._Corps)
-            self._virole  = Virole
+            if (self.intersectOnMiddle(Piq2)):
+                Virole,Piq    = couperVirolePiquagePosCas1(Piq2.geompyObject(),self._Corps)
+                self._virole  = Virole
+                print 'Virole Pos --  cas 1'
+            else:
+                Virole,Piq    = couperVirolePiquagePosCas2(Piq2.geompyObject(),self._Corps)
+                self._virole  = Virole
+                print 'Virole Pos --  cas 2'
             Piq2.setGeompyObject(Piq)
         else:
-            Virole,Piq    = couperVirolePiquageNeg(Piq2.geompyObject(),self._Corps)
-            self._virole  = Virole
+            if (self.intersectOnMiddle(Piq2)):
+                Virole,Piq    = couperVirolePiquageNegCas1(Piq2.geompyObject(),self._Corps)
+                self._virole  = Virole
+                print 'Virole Neg -- cas 1'
+            else:
+                Virole,Piq    = couperVirolePiquageNegCas2(Piq2.geompyObject(),self._Corps)
+                self._virole  = Virole
+                print 'Virole Pos -- Cas 2'
             Piq2.setGeompyObject(Piq)           
 
         self._updateCorps()
         self._piquages.append(Piq2)
+    def intersectOnMiddle(self,Piq):
+        return self._Dvirole/2.*sin(Piq.Alpha()) < Piq.Rpiquage()
+
     def ajouterPiquageAxialFond(self,nom,typ,Hpiquage,Dpiquage,Alpha,Rpiquage,Dbride):
         Piq3          = piquageAxialFond(nom,typ,Hpiquage,Rpiquage,Alpha,Dpiquage,Dbride)  
         cas           = self.piquageAxialCase(Piq3)
-        print 'Cas :', cas
+        print 'Piquage Axial -- Cas :', cas, ' Fond', typ
         if(typ == 'Gauche'):
             if cas in (1,2):
               FondG,Piq=couperFondPiquageNegCas1Ou2(Piq3.geompyObject(),self._Corps)
