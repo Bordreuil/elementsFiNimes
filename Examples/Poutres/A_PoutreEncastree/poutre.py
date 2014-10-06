@@ -23,13 +23,11 @@ notebook = salome_notebook.notebook
 ###
 
 import GEOM
-import geompy
 import math
 import SALOMEDS
 
-
-geompy.init_geom(theStudy)
-
+from salome.geom import geomBuilder
+geompy = geomBuilder.New(salome.myStudy)
 Sommet_1 = geompy.MakeVertex(0, 0, 0)
 [geomObj_1] = geompy.SubShapeAll(Sommet_1, geompy.ShapeType["VERTEX"])
 [geomObj_2] = geompy.SubShapeAll(Sommet_1, geompy.ShapeType["VERTEX"])
@@ -70,9 +68,11 @@ objId = geompy.getObjectID(Sommet_1)
 ### SMESH component
 ###
 
-import smesh, SMESH, SALOMEDS
 
-smesh.SetCurrentStudy(theStudy)
+import SMESH
+from salome.smesh import smeshBuilder
+smesh = smeshBuilder.New(salome.myStudy)
+
 import StdMeshers
 Maillage_1    = smesh.Mesh(Ligne_1)
 Regular_1D    = Maillage_1.Segment()

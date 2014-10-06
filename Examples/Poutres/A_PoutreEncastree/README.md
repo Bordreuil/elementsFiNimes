@@ -1,8 +1,8 @@
 Calcul d'une poutre encastree:
 -----------------------------
 
-Version Salomeca   : v2012.2 
-Version Code Aster : 10.
+Version Salomeca   : v2014.2 
+Version Code Aster : 11.
 
 Actions a realiser dans salome-meca (la version francaise est disponible
 dans Fichier/Preferences):
@@ -16,7 +16,10 @@ MODULE GEOMETRY:
 	- Nouvel Objet/Groupe : Definir un groupe de point :
   	 	        Encastre
 			Effort
-
+	- Vous pouvez visualiser dans le module geometry les elements de 
+	       structure. Il faut alors ouvrir un module eficas ouvrir le
+	       fichier .comm que vous allez utiliser dans le calcul et ensuite
+	       cliquer sur AFFE_CARA_ELEM est demandé view3d.
 
 MODULE MESH:
 ------------

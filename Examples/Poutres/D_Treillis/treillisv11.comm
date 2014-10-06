@@ -1,7 +1,7 @@
 #
 #  Prise en main Salome Meca - Code Aster
 #
-#	Le calcul nÃÂ©cessite :
+#	Le calcul nÃ©cessite :
 #	   - ce fichier .comm
 #          - un fichier .med (maillage, que l on peut generer
 #                             avec salome meca ou gmsh) que l on 
@@ -10,13 +10,13 @@
 #
 #	Les groupes qui doivent etre predefini au niveau
 #	   de la geometrie:
-#           - Groupe d'aretes  : TOUT
-#           - Groupe de points : Encastre, Effort 
+#           - Groupe d'aretes  : Treillis
+#           - Groupe de points : Gauche,Droite,Effort1,Effort2 
 #
 #      Ces groupes seront convertis en au niveau du maillage
 #         dans salome-meca:
-#      	   - GROUP_MA : TOUT
-#          - GROUP_NO : Encastre, Effort
+#      	   - GROUP_MA : Treillis
+#          - GROUP_NO : Gauche,Droite,Effort1, Effort2
 #
 #      Le calcul genere:
 #         - un fichier de resultat au format med (unite 80)
@@ -54,28 +54,28 @@ MODELE=AFFE_MODELE(MAILLAGE=MA,
                            MODELISATION='POU_D_E',),);
 
 # Des elements poutres necessitent la definition de
-# la section. Ici on definit un tuyau
+# la section. Ici on definit une section de type tubulaire
 
 CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
-                     POUTRE=_F(GROUP_MA='TOUT',
+                     POUTRE=_F(GROUP_MA='Treillis',
                                SECTION='CERCLE',
-                               CARA='R',
-                               VALE=20.0,),);
+                               CARA=('R','EP',),
+                               VALE=(20.0,2.0,),),);
 
 # La structure a des conditions aux limites
 # Ici, les conditions de chargement sont relativement 
-# simple. Se referer a la doc dans eficas pour plus d infos
+# simple. Se referer a la doc de code aster pour plus d infos
 
 CHARGE=AFFE_CHAR_MECA(MODELE=MODELE,
-                      DDL_IMPO=_F(GROUP_NO='Encastre',
+                      DDL_IMPO=_F(GROUP_NO=('Droite','Gauche',),
                                   DX=0.0,
                                   DY=0.0,
                                   DZ=0.0,
                                   DRX=0.0,
                                   DRY=0.0,
                                   DRZ=0.0,),
-                      FORCE_NODALE=_F(GROUP_NO='Effort',
-                                      FY=1000.0,),);
+                      FORCE_NODALE=_F(GROUP_NO=('Effort1','Effort2',),
+                                      FY=-100000.0,),);
 
 # Le calcul se deroule dans cette macro
 # Les problemes peuvent se passer lors de la resolution
@@ -107,11 +107,8 @@ RESU1=CALC_CHAMP(reuse =RESU1,
 # etre analysees: SIPO_ELNO
 
 IMPR_RESU(FORMAT='MED',
-          CONCEPT=_F(CARA_ELEM=CAREL,
-                     REPERE_LOCAL='OUI',
-                     MODELE=MODELE,),
           RESU=_F(RESULTAT=RESU1,
                   NOM_CHAM=('DEPL','SIPO_NOEU','SIPO_ELNO',),),);
 
 FIN(FORMAT_HDF='OUI',);
-#CHECKSUM:58fa1ac7bd4b329be67e4752e43d0599  -:FIN CHECKSUM
+#CHECKSUM:39adbb18478eebae55213325a47801a9  -:FIN CHECKSUM
