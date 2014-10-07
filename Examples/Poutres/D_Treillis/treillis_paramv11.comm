@@ -1,7 +1,7 @@
 #
 #  Prise en main Salome Meca - Code Aster
 #
-#	Le calcul nÃÂ©cessite :
+#	Le calcul nécessite :
 #	   - ce fichier .comm
 #          - un fichier .med (maillage, que l on peut generer
 #                             avec salome meca ou gmsh) que l on 
@@ -10,13 +10,13 @@
 #
 #	Les groupes qui doivent etre predefini au niveau
 #	   de la geometrie:
-#           - Groupe d'aretes  : Treillis
-#           - Groupe de points : Gauche,Droite,Effort1,Effort2 
+#           - Groupe d'aretes  : TOUT
+#           - Groupe de points : Encastre, Effort 
 #
 #      Ces groupes seront convertis en au niveau du maillage
 #         dans salome-meca:
-#      	   - GROUP_MA : Treillis
-#          - GROUP_NO : Gauche,Droite,Effort1, Effort2
+#      	   - GROUP_MA : TOUT
+#          - GROUP_NO : Encastre, Effort
 #
 #      Le calcul genere:
 #         - un fichier de resultat au format med (unite 80)
@@ -49,33 +49,37 @@ CHMAT=AFFE_MATERIAU(MAILLAGE=MA,
 # Le maillage
 
 MODELE=AFFE_MODELE(MAILLAGE=MA,
-                   AFFE=_F(TOUT='OUI',
-                           PHENOMENE='MECANIQUE',
-                           MODELISATION='POU_D_E',),);
+                   AFFE=(_F(GROUP_MA='Tout',
+                            PHENOMENE='MECANIQUE',
+                            MODELISATION='POU_D_E',),
+                         _F(GROUP_MA='Cable',
+                            PHENOMENE='MECANIQUE',
+                            MODELISATION='BARRE',),),);
 
 # Des elements poutres necessitent la definition de
 # la section. Ici on definit une section de type tubulaire
 
 CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
-                     POUTRE=_F(GROUP_MA='Treillis',
+                     POUTRE=_F(GROUP_MA='Tout',
                                SECTION='CERCLE',
                                CARA=('R','EP',),
-                               VALE=(20.0,2.0,),),);
+                               VALE=(40.,2.,),),
+                     BARRE=_F(GROUP_MA='Cable',
+                              SECTION='CERCLE',
+                              CARA='R',
+                              VALE=10,),);
 
 # La structure a des conditions aux limites
 # Ici, les conditions de chargement sont relativement 
 # simple. Se referer a la doc de code aster pour plus d infos
 
 CHARGE=AFFE_CHAR_MECA(MODELE=MODELE,
-                      DDL_IMPO=_F(GROUP_NO=('Droite','Gauche',),
+                      DDL_IMPO=_F(GROUP_NO=('Pivot','Picable',),
                                   DX=0.0,
                                   DY=0.0,
-                                  DZ=0.0,
-                                  DRX=0.0,
-                                  DRY=0.0,
-                                  DRZ=0.0,),
-                      FORCE_NODALE=_F(GROUP_NO=('Effort1','Effort2',),
-                                      FY=-100000.0,),);
+                                  DZ=0.0,),
+                      FORCE_NODALE=_F(GROUP_NO='Efforts',
+                                      FY=-100000.,),);
 
 # Le calcul se deroule dans cette macro
 # Les problemes peuvent se passer lors de la resolution
@@ -91,15 +95,17 @@ RESU1=MECA_STATIQUE(MODELE=MODELE,
 
 # Les contraintes sont d abord calculer dans les elements
 
-RESU1=CALC_CHAMP(reuse =RESU1,
-                 RESULTAT=RESU1,
-                 CONTRAINTE=('SIPO_ELNO','SIEF_ELNO',),);
+
+RESU1=CALC_CHAMP(CONTRAINTE='SIPO_ELNO',
+                 reuse =RESU1,
+                RESULTAT=RESU1,);
 
 # Ensuite interpole au noeud
 
-RESU1=CALC_CHAMP(reuse =RESU1,
-                 RESULTAT=RESU1,
-                 CONTRAINTE='SIPO_NOEU',);
+
+RESU1=CALC_CHAMP(CONTRAINTE='SIPO_NOEU',
+                   reuse =RESU1,
+              RESULTAT=RESU1,);
 
 # puis ecrit dans le fichier de resultat .med
 # Pour le dimensionnement des sections des poutres
@@ -111,4 +117,4 @@ IMPR_RESU(FORMAT='MED',
                   NOM_CHAM=('DEPL','SIPO_NOEU','SIPO_ELNO',),),);
 
 FIN(FORMAT_HDF='OUI',);
-#CHECKSUM:bc82716e7e9caa44b1cda533795d649d  -:FIN CHECKSUM
+#CHECKSUM:bc4e3b8d5dfa6f2c6c40eb925e59fb34  -:FIN CHECKSUM

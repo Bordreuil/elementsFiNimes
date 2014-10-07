@@ -8,23 +8,22 @@ import sys
 import salome
 
 salome.salome_init()
-theStudy = salome.myStudy
+#theStudy = salome.myStudy
 
 import salome_notebook
 notebook = salome_notebook.notebook
-sys.path.insert( 0, r'/home/bordreuil/Enseignement/elementsFiNimes/Examples/Poutres/D_Treillis')
 
 ###
 ### GEOM component
 ###
 
 import GEOM
-import geompy
 import math
 import SALOMEDS
 
 
-geompy.init_geom(theStudy)
+from salome.geom import geomBuilder
+geompy = geomBuilder.New(salome.myStudy)
 
 O = geompy.MakeVertex(0, 0, 0)
 OX = geompy.MakeVectorDXDYDZ(1, 0, 0)
