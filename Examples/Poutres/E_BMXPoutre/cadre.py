@@ -8,17 +8,9 @@ import sys
 import salome
 
 salome.salome_init()
-theStudy = salome.myStudy
 
 import salome_notebook
 notebook = salome_notebook.notebook
-#sys.path.insert( 0, r'/home/bordreuil/Enseignement/elementsFiNimes/Examples/C_BMXPoutre')
-
-import iparameters
-ipar = iparameters.IParameters(salome.myStudy.GetCommonParameters("Interface Applicative", 1), True)
-
-ipar.append("AP_MODULES_LIST", "Geometry")
-ipar.append("AP_MODULES_LIST", "Mesh")
 
 
 ###
@@ -26,12 +18,12 @@ ipar.append("AP_MODULES_LIST", "Mesh")
 ###
 
 import GEOM
-import geompy
 import math
 import SALOMEDS
+from salome.geom import geomBuilder
+geompy = geomBuilder.New(salome.myStudy)
 
 
-geompy.init_geom(theStudy)
 x_0 = 0.;   y_0 = 0.;
 x_1 = 5.;   y_1 = -100.;
 x_2 = -500.;y_2 = -10.;
@@ -95,67 +87,6 @@ geompy.addToStudy( Arriere_haut_4, 'Arriere_haut_4' )
 geompy.addToStudy( Fourche, 'Fourche' )
 geompy.addToStudy( Cadre, 'Cadre' )
 
-##
-
-
-###
-### SMESH component
-###
-
-import smesh, SMESH, SALOMEDS
-
-smesh.SetCurrentStudy(theStudy)
-import StdMeshers
-Nb_Segments_1 = smesh.CreateHypothesis('NumberOfSegments')
-Nb_Segments_1.SetNumberOfSegments( 10 )
-Nb_Segments_1.SetDistrType( 0 )
-
-Regular_1D = smesh.CreateHypothesis('Regular_1D')
-
-Maillage_1 = smesh.Mesh(Cadre)
-status = Maillage_1.AddHypothesis(Nb_Segments_1)
-status = Maillage_1.AddHypothesis(Regular_1D)
-isDone = Maillage_1.Compute()
-TOUT = Maillage_1.CreateEmptyGroup( SMESH.EDGE, 'TOUT' )
-nbAdd = TOUT.Add( [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130 ] )
-TOUT.SetColor( SALOMEDS.Color( 0, 0.666667, 1 ))
-Fourche_1 = Maillage_1.CreateEmptyGroup( SMESH.EDGE, 'Fourche' )
-nbAdd = Fourche_1.Add( [ 41, 42, 43, 44, 45, 46, 47, 48, 49, 50 ] )
-Fourche_1.SetColor( SALOMEDS.Color( 0, 0.666667, 1 ))
-Direct = Maillage_1.CreateEmptyGroup( SMESH.EDGE, 'Direct' )
-nbAdd = Direct.Add( [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] )
-Direct.SetColor( SALOMEDS.Color( 0, 0.666667, 1 ))
-Arr = Maillage_1.CreateEmptyGroup( SMESH.EDGE, 'Arr' )
-nbAdd = Arr.Add( [ 52, 53, 54, 55, 56, 57, 58, 59, 60, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 92, 93, 94, 95, 96, 97, 98, 99, 100, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130 ] )
-Arr.SetColor( SALOMEDS.Color( 0, 0.666667, 1 ))
-AxeAv = Maillage_1.CreateEmptyGroup( SMESH.NODE, 'AxeAv' )
-nbAdd = AxeAv.Add( [ 5 ] )
-AxeAv.SetColor( SALOMEDS.Color( 0, 0.666667, 1 ))
-AxeAr = Maillage_1.CreateEmptyGroup( SMESH.NODE, 'AxeAr' )
-nbAdd = AxeAr.Add( [ 9, 8 ] )
-AxeAr.SetColor( SALOMEDS.Color( 0, 0.666667, 1 ))
-Pedale = Maillage_1.CreateEmptyGroup( SMESH.NODE, 'Pedale' )
-nbAdd = Pedale.Add( [ 4 ] )
-Pedale.SetColor( SALOMEDS.Color( 0, 0.666667, 1 ))
-Potence = Maillage_1.CreateEmptyGroup( SMESH.NODE, 'Potence' )
-nbAdd = Potence.Add( [ 1 ] )
-Potence.SetColor( SALOMEDS.Color( 0, 0.666667, 1 ))
-isDone = Maillage_1.Compute()
-
-
-smesh.SetName(Nb_Segments_1, 'Nb. Segments_1')
-smesh.SetName(Regular_1D, 'Regular_1D')
-smesh.SetName(Maillage_1.GetMesh(), 'Maillage_1')
-smesh.SetName(TOUT, 'TOUT')
-smesh.SetName(Fourche_1, 'Fourche')
-smesh.SetName(Direct, 'Direct')
-smesh.SetName(Arr, 'Arr')
-smesh.SetName(AxeAv, 'AxeAv')
-smesh.SetName(AxeAr, 'AxeAr')
-smesh.SetName(Pedale, 'Pedale')
-smesh.SetName(Potence, 'Potence')
-
 
 if salome.sg.hasDesktop():
   salome.sg.updateObjBrowser(1)
-  iparameters.getSession().restoreVisualState(1)
