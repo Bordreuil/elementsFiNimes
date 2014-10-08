@@ -18,12 +18,11 @@ notebook = salome_notebook.notebook
 ###
 
 import GEOM
-import geompy
 import math
 import SALOMEDS
+from salome.geom import geomBuilder
+geompy = geomBuilder.New(salome.myStudy)
 
-
-geompy.init_geom(theStudy)
 L     = 400.
 l     = 150.
 Rtrou = 25.
