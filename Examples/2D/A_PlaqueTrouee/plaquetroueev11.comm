@@ -1,0 +1,89 @@
+#  
+# Tp Dut GMP - Iut de Nimes
+#    cyril.bordreuil@univ-montp2.fr
+#    
+#    Analyse d une plaque trouee en contraintes planes
+#    Dans le cas ou toute la structure est maillee
+#
+
+# Initialisation du calcul
+DEBUT();
+
+# Definition du materiau
+MA=DEFI_MATERIAU(ELAS=_F(E=210000.0,
+                         NU=0.3,),);
+
+# Lecture du maillage
+MAIL=LIRE_MAILLAGE(FORMAT='MED',);
+
+# Modification du maillage pour creer a partir 
+# du segment ou la pression sera applique 
+# une orientation des elements de peau
+MAIL=MODI_MAILLAGE(reuse=MAIL,
+                   MAILLAGE=MAIL,
+                   ORIE_PEAU_2D=_F(GROUP_MA=('Haut',),),
+                   );
+
+# Definition du modele mecanique
+# C_PLAN est le mot cle pour contraintes planes
+MODE=AFFE_MODELE(MAILLAGE=MAIL,
+                 AFFE=_F(TOUT='OUI',
+                         PHENOMENE='MECANIQUE',
+                         MODELISATION='C_PLAN',),);
+
+
+# Affectation des proprietes materiau
+MATE=AFFE_MATERIAU(MAILLAGE=MAIL,
+                   AFFE=_F(TOUT='OUI',
+                           MATER=MA,),);
+
+# Affectation des conditions aux limites
+#   DDL_IMPO = pour un degre de liberte impose en 2D ce ne sont que des 
+#              deplacement.
+#              En general, les DDL_IMPO s'applique sur des noeuds
+#              mais le code aster convertir des groupes 
+#   PRES_REP = pression : cette action est distribuee, elle s'applique sur
+#              des elements geomertiques de surfaces plan -> segment
+#              on les applique sur un groupe de maille
+CHAR=AFFE_CHAR_MECA(MODELE=MODE,
+                    DDL_IMPO=(
+                        _F(GROUP_MA='Bas',
+                           DX=0.0,
+                           DY=0.0,),
+                        ),
+                    PRES_REP=(
+                        _F(GROUP_MA='Haut',
+                           PRES=-1.0,),
+                        ),
+                    );
+# Resolution du probleme
+RESU=MECA_STATIQUE(MODELE=MODE,
+                   CHAM_MATER=MATE,
+                   EXCIT=_F(CHARGE=CHAR,),);
+
+
+# Extraction des resulats:
+# 	     - SIGM : Tenseur des contraintes
+#	       	    determine a partir des deplacements
+#	     - SIEQ : Contraintes equivalentes
+
+RESU=CALC_CHAMP(CRITERES=('SIEQ_ELNO',),
+                CONTRAINTE=('SIGM_ELNO',),
+                reuse=RESU,
+               RESULTAT=RESU,);
+
+# Moyennation au niveau des noeuds pour la visualisation
+
+RESU=CALC_CHAMP(CRITERES=( 'SIEQ_NOEU', ),
+                  CONTRAINTE=('SIGM_NOEU', ),
+                  reuse=RESU,
+             RESULTAT=RESU,);
+
+# Extraction au niveau d un fichier de sortie
+IMPR_RESU(FORMAT='MED',
+          UNITE=80,
+          RESU=_F(MAILLAGE=MAIL,
+                  RESULTAT=RESU,
+                  NOM_CHAM=('SIGM_NOEU','SIEQ_NOEU','DEPL',),),);
+
+FIN();

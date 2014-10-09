@@ -1,0 +1,67 @@
+
+DEBUT();
+
+MA=DEFI_MATERIAU(ELAS=_F(E=210000.0,
+                         NU=0.3,),);
+
+MAIL=LIRE_MAILLAGE(FORMAT='MED',);
+
+MAIL=MODI_MAILLAGE(reuse =MAIL,
+                   MAILLAGE=MAIL,
+                   ORIE_PEAU_2D=_F(GROUP_MA='Effort',),);
+
+MODE=AFFE_MODELE(MAILLAGE=MAIL,
+                 AFFE=_F(TOUT='OUI',
+                         PHENOMENE='MECANIQUE',
+                         MODELISATION='C_PLAN',),);
+
+MATE=AFFE_MATERIAU(MAILLAGE=MAIL,
+                   AFFE=_F(TOUT='OUI',
+                           MATER=MA,),);
+
+CHAR=AFFE_CHAR_MECA(MODELE=MODE,
+                    DDL_IMPO=(_F(GROUP_MA='Encastre',
+                                 DX=0.0,
+                                 DY=0.0,),
+                              _F(GROUP_MA='Sym',
+                                 DY=0.0,),),
+                    PRES_REP=_F(GROUP_MA='Effort',
+                                PRES=-5.0,),);
+
+RESU=MECA_STATIQUE(MODELE=MODE,
+                   CHAM_MATER=MATE,
+                   EXCIT=_F(CHARGE=CHAR,),);
+
+RESU=CALC_CHAMP(reuse =RESU,
+                MODELE=MODE,
+                CHAM_MATER=MATE,
+                RESULTAT=RESU,
+                EXCIT=_F(CHARGE=CHAR,),
+                CONTRAINTE='SIGM_ELNO',
+                CRITERES='SIEQ_ELNO',);
+
+RESU=CALC_CHAMP(reuse =RESU,
+                RESULTAT=RESU,
+                CONTRAINTE='SIGM_NOEU',
+                CRITERES='SIEQ_NOEU',);
+
+IMPR_RESU(FORMAT='MED',
+          UNITE=80,
+          RESU=_F(MAILLAGE=MAIL,
+                  RESULTAT=RESU,
+                  NOM_CHAM=('SIGM_NOEU','SIEQ_NOEU','DEPL',),),);
+
+T_RESU=POST_RELEVE_T(ACTION=_F(OPERATION='EXTRACTION',
+                               INTITULE='LIGNE',
+                               RESULTAT=RESU,
+                               NOM_CHAM='SIGM_NOEU',
+                               GROUP_NO='Apo',
+                               TOUT_CMP='OUI',),);
+
+IMPR_TABLE(TABLE=T_RESU,
+           FORMAT='AGRAF',
+           UNITE=25,
+           NOM_PARA=('COOR_X','COOR_Y','SIXX','SIYY','SIXY',),);
+
+FIN();
+#CHECKSUM:ce54c1f95df89a06297e61d8288c0b5a  -:FIN CHECKSUM
