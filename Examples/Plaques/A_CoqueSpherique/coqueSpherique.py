@@ -18,12 +18,12 @@ notebook = salome_notebook.notebook
 ###
 
 import GEOM
-import geompy
 import math
 import SALOMEDS
+from salome.geom import geomBuilder
 
+geompy = geomBuilder.New(salome.myStudy)
 
-geompy.init_geom(theStudy)
 
 Rcoque = 200.
 
@@ -53,40 +53,11 @@ geompy.addToStudy( Sommet_1, 'Sommet_1' )
 geompy.addToStudy( Sommet_2, 'Sommet_2' )
 geompy.addToStudy( Sommet_3, 'Sommet_3' )
 geompy.addToStudy( Arc_1, 'Arc_1' )
-geompy.addToStudy( R_volution_1, 'Révolution_1' )
+geompy.addToStudy( R_volution_1, 'Coque' )
 geompy.addToStudyInFather( R_volution_1, NZ, 'NZ' )
 geompy.addToStudyInFather( R_volution_1, NY, 'NY' )
 geompy.addToStudyInFather( R_volution_1, NX, 'NX' )
 
-###
-### SMESH component
-###
-
-import smesh, SMESH, SALOMEDS
-
-smesh.SetCurrentStudy(theStudy)
-import NETGENPlugin
-Maillage_1 = smesh.Mesh(R_volution_1)
-NETGEN_2D = Maillage_1.Triangle(algo=smesh.NETGEN_1D2D)
-NETGEN_2D_Parameters = NETGEN_2D.Parameters()
-NETGEN_2D_Parameters.SetMaxSize( 5 )
-NETGEN_2D_Parameters.SetSecondOrder( 0 )
-NETGEN_2D_Parameters.SetOptimize( 1 )
-NETGEN_2D_Parameters.SetFineness( 2 )
-NETGEN_2D_Parameters.SetMinSize( 1 )
-NETGEN_2D_Parameters.SetQuadAllowed( 0 )
-isDone = Maillage_1.Compute()
-NZ_1 = Maillage_1.GroupOnGeom(NZ,'NZ',SMESH.NODE)
-NY_1 = Maillage_1.GroupOnGeom(NY,'NY',SMESH.NODE)
-NX_1 = Maillage_1.GroupOnGeom(NX,'NX',SMESH.NODE)
-
-## set object names
-smesh.SetName(Maillage_1.GetMesh(), 'Maillage_1')
-smesh.SetName(NETGEN_2D.GetAlgorithm(), 'NETGEN_2D')
-smesh.SetName(NETGEN_2D_Parameters, 'NETGEN 2D Parameters')
-smesh.SetName(NZ_1, 'NZ')
-smesh.SetName(NY_1, 'NY')
-smesh.SetName(NX_1, 'NX')
 
 if salome.sg.hasDesktop():
   salome.sg.updateObjBrowser(1)

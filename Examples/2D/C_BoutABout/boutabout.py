@@ -12,7 +12,6 @@ theStudy = salome.myStudy
 
 import salome_notebook
 notebook = salome_notebook.NoteBook(theStudy)
-sys.path.insert( 0, r'/home/bordreuil/Enseignement/elementsFiNimes/Examples/2D/C_BoutABout')
 
 ###
 ### GEOM component
@@ -23,6 +22,10 @@ from salome.geom import geomBuilder
 import math
 import SALOMEDS
 
+Lplaque = 25.
+eplaque = 4.
+
+unsurracine2=1./2.
 
 geompy = geomBuilder.New(theStudy)
 
@@ -31,15 +34,15 @@ OX = geompy.MakeVectorDXDYDZ(1, 0, 0)
 OY = geompy.MakeVectorDXDYDZ(0, 1, 0)
 OZ = geompy.MakeVectorDXDYDZ(0, 0, 1)
 Sommet_1 = geompy.MakeVertex(0, 0, 0)
-Sommet_2 = geompy.MakeVertex(15, 0, 0)
-Sommet_3 = geompy.MakeVertex(100, 0, 0)
-Sommet_4 = geompy.MakeVertex(100, -5, 0)
-Sommet_5 = geompy.MakeVertex(15, -5, 0)
-Sommet_6 = geompy.MakeVertex(0, -5, 0)
-Sommet_7 = geompy.MakeVertex(0, 10, 0)
-Sommet_8 = geompy.MakeVertex(-100, 10, 0)
-Sommet_9 = geompy.MakeVertex(-100, 0, 0)
-Sommet_12 = geompy.MakeVertex(7, 6.5, 0)
+Sommet_2 = geompy.MakeVertex(eplaque, 0, 0)
+Sommet_3 = geompy.MakeVertex(Lplaque, 0, 0)
+Sommet_4 = geompy.MakeVertex(Lplaque, -eplaque/2., 0)
+Sommet_5 = geompy.MakeVertex(eplaque, -eplaque/2., 0)
+Sommet_6 = geompy.MakeVertex(0, -eplaque/2., 0)
+Sommet_7 = geompy.MakeVertex(0, eplaque, 0)
+Sommet_8 = geompy.MakeVertex(-Lplaque, eplaque, 0)
+Sommet_9 = geompy.MakeVertex(-Lplaque, 0, 0)
+Sommet_12 = geompy.MakeVertex(eplaque*unsurracine2, eplaque*unsurracine2, 0)
 Ligne_1 = geompy.MakeLineTwoPnt(Sommet_1, Sommet_7)
 Ligne_2 = geompy.MakeLineTwoPnt(Sommet_7, Sommet_8)
 Ligne_3 = geompy.MakeLineTwoPnt(Sommet_8, Sommet_9)
@@ -65,14 +68,14 @@ Face_2 = geompy.MakeFaceWires([Ligne_1, Ligne_5, Ligne_6], 1)
 Face_3 = geompy.MakeFaceWires([Ligne_5, Ligne_7, Ligne_8], 1)
 Face_4 = geompy.MakeFaceWires([Ligne_7, Ligne_9, Ligne_10, Ligne_11], 1)
 Face_5 = geompy.MakeFaceWires([Ligne_11, Ligne_12, Ligne_13, Ligne_14], 1)
-Assemblage_1 = geompy.MakeCompound([Face_1, Face_2, Face_3, Face_4, Face_5])
-gauche = geompy.CreateGroup(Assemblage_1, geompy.ShapeType["EDGE"])
-geompy.UnionIDs(gauche, [9])
-Apo = geompy.CreateGroup(Assemblage_1, geompy.ShapeType["EDGE"])
-geompy.UnionIDs(Apo, [16])
-Sym = geompy.CreateGroup(Assemblage_1, geompy.ShapeType["EDGE"])
+BoutA = geompy.MakeCompound([Face_1, Face_2, Face_3, Face_4, Face_5])
+Gauche = geompy.CreateGroup(BoutA, geompy.ShapeType["EDGE"])
+geompy.UnionIDs(Gauche, [9])
+Gorge = geompy.CreateGroup(BoutA, geompy.ShapeType["EDGE"])
+geompy.UnionIDs(Gorge, [16])
+Sym = geompy.CreateGroup(BoutA, geompy.ShapeType["EDGE"])
 geompy.UnionIDs(Sym, [26, 35])
-Effort = geompy.CreateGroup(Assemblage_1, geompy.ShapeType["EDGE"])
+Effort = geompy.CreateGroup(BoutA, geompy.ShapeType["EDGE"])
 geompy.UnionIDs(Effort, [33])
 geompy.addToStudy( O, 'O' )
 geompy.addToStudy( OX, 'OX' )
@@ -115,11 +118,11 @@ geompy.addToStudy( Face_2, 'Face_2' )
 geompy.addToStudy( Face_3, 'Face_3' )
 geompy.addToStudy( Face_4, 'Face_4' )
 geompy.addToStudy( Face_5, 'Face_5' )
-geompy.addToStudy( Assemblage_1, 'Assemblage_1' )
-geompy.addToStudyInFather( Assemblage_1, gauche, 'gauche' )
-geompy.addToStudyInFather( Assemblage_1, Apo, 'Apo' )
-geompy.addToStudyInFather( Assemblage_1, Sym, 'Sym' )
-geompy.addToStudyInFather( Assemblage_1, Effort, 'Effort' )
+geompy.addToStudy( BoutA, 'BoutA' )
+geompy.addToStudyInFather( BoutA, Gauche, 'Gauche' )
+geompy.addToStudyInFather( BoutA, Gorge, 'Gorge' )
+geompy.addToStudyInFather( BoutA, Sym, 'Sym' )
+geompy.addToStudyInFather( BoutA, Effort, 'Effort' )
 
 
 if salome.sg.hasDesktop():

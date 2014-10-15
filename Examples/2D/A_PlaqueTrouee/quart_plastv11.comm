@@ -93,7 +93,9 @@ RESU=STAT_NON_LINE(MODELE=MODE,
                              FONC_MULT=F_SIGM,),),
                    COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
                    INCREMENT=_F(LIST_INST=L_INST,),
-                   CONVERGENCE=_F(ITER_GLOB_MAXI=10,),);
+                   NEWTON=_F(REAC_ITER=1,
+                             REAC_ITER_ELAS=1,),
+                   CONVERGENCE=_F(ITER_GLOB_MAXI=200,),);
 
 # ----> Calcul de valeur pour le post  traitement
 
@@ -128,7 +130,7 @@ T_RESU=POST_RELEVE_T(ACTION=_F(OPERATION='EXTRACTION',
                                INTITULE='LIGNE',
                                RESULTAT=RESU,
                                NOM_CHAM='SIEF_NOEU',
-                               NUME_ORDRE=10,
+                               NUME_ORDRE=20,
                                GROUP_NO='Sym1',
                                TOUT_CMP='OUI',),);
 
@@ -138,4 +140,4 @@ IMPR_TABLE(TABLE=T_RESU,
            NOM_PARA=('COOR_X','SIYY',),);
 
 FIN();
-#CHECKSUM:51e9e6ea077f6986e5a8431efa591928  -:FIN CHECKSUM
+#CHECKSUM:92023f7f2b5823fab1e2e5376046b6dd  -:FIN CHECKSUM

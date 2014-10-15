@@ -1,24 +1,40 @@
 
+#
+#	TP EF: Formation Genie mecanique Nimes
+#	Calcul des contraintes le long d un fond de gorge
+#	Les groupes utilises dans l'analyse sont:
+#	    - Sym : moitié de la modélisation
+#	    - 
+#	 
+#	 Contact : cyril.bordreuil@univ-montp2.fr
+#
+# -----> Debut du calcul
 DEBUT();
 
+
+#...Definition du materiau
 MA=DEFI_MATERIAU(ELAS=_F(E=210000.0,
                          NU=0.3,),);
 
+#...Lecture du maillage 
 MAIL=LIRE_MAILLAGE(FORMAT='MED',);
+
 
 MAIL=MODI_MAILLAGE(reuse =MAIL,
                    MAILLAGE=MAIL,
                    ORIE_PEAU_2D=_F(GROUP_MA='Effort',),);
 
+#...Affectation d un modele en contrainte plane
 MODE=AFFE_MODELE(MAILLAGE=MAIL,
                  AFFE=_F(TOUT='OUI',
                          PHENOMENE='MECANIQUE',
                          MODELISATION='C_PLAN',),);
-
+#...Affectation du materiau 
 MATE=AFFE_MATERIAU(MAILLAGE=MAIL,
                    AFFE=_F(TOUT='OUI',
                            MATER=MA,),);
 
+#...Affectation des conditions aux limites
 CHAR=AFFE_CHAR_MECA(MODELE=MODE,
                     DDL_IMPO=(_F(GROUP_MA='Encastre',
                                  DX=0.0,
@@ -28,10 +44,12 @@ CHAR=AFFE_CHAR_MECA(MODELE=MODE,
                     PRES_REP=_F(GROUP_MA='Effort',
                                 PRES=-5.0,),);
 
+#... Calcul lineaire pour determiner les contraintes
 RESU=MECA_STATIQUE(MODELE=MODE,
                    CHAM_MATER=MATE,
                    EXCIT=_F(CHARGE=CHAR,),);
 
+#... Calcul des champs resultats
 RESU=CALC_CHAMP(reuse =RESU,
                 MODELE=MODE,
                 CHAM_MATER=MATE,
@@ -39,25 +57,27 @@ RESU=CALC_CHAMP(reuse =RESU,
                 EXCIT=_F(CHARGE=CHAR,),
                 CONTRAINTE='SIGM_ELNO',
                 CRITERES='SIEQ_ELNO',);
-
+#... Moyennation des contraintes aux noeuds
 RESU=CALC_CHAMP(reuse =RESU,
                 RESULTAT=RESU,
                 CONTRAINTE='SIGM_NOEU',
                 CRITERES='SIEQ_NOEU',);
-
+#... Impression des resultats dans un fichier .rmed 
 IMPR_RESU(FORMAT='MED',
           UNITE=80,
           RESU=_F(MAILLAGE=MAIL,
                   RESULTAT=RESU,
                   NOM_CHAM=('SIGM_NOEU','SIEQ_NOEU','DEPL',),),);
 
+#... Extraction des contraintes le long du groupe de noeud Gorge
 T_RESU=POST_RELEVE_T(ACTION=_F(OPERATION='EXTRACTION',
                                INTITULE='LIGNE',
                                RESULTAT=RESU,
                                NOM_CHAM='SIGM_NOEU',
-                               GROUP_NO='Apo',
+                               GROUP_NO='Gorge',
                                TOUT_CMP='OUI',),);
-
+#... Impression des resultats dans l unite logique 25
+# Il faut avoir defini l'unite logique dans astk, le gestionnaire de fichier du code aster.
 IMPR_TABLE(TABLE=T_RESU,
            FORMAT='AGRAF',
            UNITE=25,
