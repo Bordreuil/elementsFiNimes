@@ -1,0 +1,157 @@
+#
+#	CAS TEST:
+#	Calcul des contraintes dans une coque spherique sous pression
+#	
+#	Un huitieme de la geometrie est modelise.
+#	
+#	Differents groupes sont definis :
+#	  - Groupes de Noeuds:
+#	     - Encastre
+#	     - Effort
+#	  - Groupes de Faces:
+#	     - Te
+
+DEBUT();
+
+#
+#	Lecture Maillage 
+
+MA=LIRE_MAILLAGE(FORMAT='MED',
+                 INFO=1,);
+
+#
+#	Definition du materiau ici Acier
+
+MATER=DEFI_MATERIAU(ELAS=_F(E=196200.0,
+                            NU=0.3,
+                            RHO=10000.0,),);
+
+#
+#	Affectation du materiau
+
+CHMAT=AFFE_MATERIAU(MAILLAGE=MA,
+                    AFFE=_F(TOUT='OUI',
+                            MATER=MATER,),);
+
+#
+#	Modelisation mecanique, on suppose
+#	que la geometrie a ete modelise par des 
+#	triangles
+
+MODELE=AFFE_MODELE(MAILLAGE=MA,
+                   AFFE=_F(TOUT='OUI',
+                           PHENOMENE='MECANIQUE',
+                           MODELISATION='DKT',),);
+
+#
+#	Definition des caracteristiques elementaires
+#	pour les plaques : epaisseur
+
+CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
+                     COQUE=_F(GROUP_MA='Te',
+                              EPAIS=5.0,
+                              VECTEUR=(0.0,1.0,0.0,),),);
+
+#
+#	Definition et Affectation des conditions aux limites
+
+CHARGE=AFFE_CHAR_MECA(VERI_NORM='NON',
+                      MODELE=MODELE,
+                      DDL_IMPO=_F(GROUP_NO='Encastre',
+                                  DX=0.0,
+                                  DY=0.0,
+                                  DZ=0.0,),
+                      FORCE_NODALE=_F(GROUP_NO='Effort',
+                                      FZ=10.0,),);
+
+#
+#	Resolution statique
+
+RESU1=MECA_STATIQUE(MODELE=MODELE,
+                    CHAM_MATER=CHMAT,
+                    CARA_ELEM=CAREL,
+                    EXCIT=_F(CHARGE=CHARGE,),
+                    OPTION='SANS',
+                    SOLVEUR=_F(METHODE='MULT_FRONT',
+                               RENUM='METIS',
+                               NPREC=12,
+                               STOP_SINGULIER='OUI',),);
+
+#
+#	Extraction des resultats avant impression
+#	Pour les plaques les contraintes de flexion et de
+#	membrane ne sont pas directement donnees, il faut d abord
+#	extraire les contraintes sur le NIVE_COUCHE moyenne (Ligne neutre)
+#	puis sur la couche superieure
+#	On remarque que les resultats sont stockees dans deux resultats
+#	differents NEUTRE et SUP qu'on pourra combiner dans 
+#	paraview pour extraire la contrainte de membrane
+#
+# -------------------------------------------------
+#	Definition du resultat sur la surface moyenne
+
+RESU1=CALC_CHAMP(reuse =RESU1,
+                 RESULTAT=RESU1,
+                 CONTRAINTE=('SIGM_ELNO','SIEF_ELNO','EFGE_ELNO',),);
+
+NEUTRE=POST_CHAMP(RESULTAT=RESU1,
+                  GROUP_MA='Te',
+                  EXTR_COQUE=_F(NOM_CHAM='SIGM_ELNO',
+                                NUME_COUCHE=1,
+                                NIVE_COUCHE='MOY',),);
+
+NEUTRE=CALC_CHAMP(reuse =NEUTRE,
+                  RESULTAT=NEUTRE,
+                  CONTRAINTE='SIGM_NOEU',);
+
+SUP=POST_CHAMP(RESULTAT=RESU1,
+               GROUP_MA='Te',
+               EXTR_COQUE=_F(NOM_CHAM='SIGM_ELNO',
+                             NUME_COUCHE=1,
+                             NIVE_COUCHE='SUP',),);
+
+SUP=CALC_CHAMP(reuse =SUP,
+               RESULTAT=SUP,
+               CONTRAINTE='SIGM_NOEU',);
+
+# -------------------------------------------------
+#	Definition du resultat sur la surface superieure
+#
+#	Impression des resultats au format MED. 
+
+FACESUP=CALC_CHAMP(RESULTAT=RESU1,
+                   GROUP_MA='FaceSup',
+                   CONTRAINTE=('EFGE_ELNO','EFGE_NOEU',),);
+
+IMPR_RESU(FORMAT='MED',
+          UNITE=80,
+          RESU=(_F(MAILLAGE=MA,
+                   RESULTAT=NEUTRE,
+                   NOM_CHAM='SIGM_ELNO',),
+                _F(MAILLAGE=MA,
+                   RESULTAT=SUP,
+                   NOM_CHAM='SIGM_ELNO',),
+                _F(MAILLAGE=MA,
+                   RESULTAT=RESU1,
+                   NOM_CHAM=('DEPL','SIEF_ELNO','EFGE_ELNO',),),),);
+##CORDON=CALC_CHAMP(RESULTAT=FACESUP,
+##GROUP_MA='Cordon',
+##CONTRAINTE='EFGE_ELNO',);
+
+
+T_RESU=POST_RELEVE_T(ACTION=_F(OPERATION='EXTRACTION',
+                               INTITULE='LIGNE',
+                               RESULTAT=FACESUP,
+                               NOM_CHAM='EFGE_NOEU',
+                               GROUP_NO='Cordon',
+                               TOUT_CMP='OUI',
+                               MOYE_NOEUD='NON',),
+                     INFO=2,);
+
+IMPR_TABLE(TABLE=T_RESU,
+           FORMAT='AGRAF',
+           UNITE=25,
+           NOM_PARA=('COOR_Y','COOR_X','NYY','NXX','NXY','MYY','MXX',),);
+
+FIN();
+#CHECKSUM:9f141b6a5370df1df040d472e77fc26d  -:FIN CHECKSUM
