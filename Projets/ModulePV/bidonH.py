@@ -8,7 +8,8 @@
 import sys
 import salome
 import sys
-sys.path.append('/home/bordreuil/Enseignement/elementsFiNimes/Tools')
+# On doit s
+sys.path.append('../../Tools')
 salome.salome_init()
 theStudy = salome.myStudy
 
@@ -21,7 +22,10 @@ sys.path.insert( 0, r'/home/polytux/elementsFinis/ProjetMeca')
 ###
 
 import GEOM
-import geompy
+
+from salome.geom import geomBuilder
+geompy = geomBuilder.New(salome.myStudy)
+
 import math
 import SALOMEDS
 from   numpy import *

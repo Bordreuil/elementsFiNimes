@@ -7,7 +7,7 @@
 
 
 
-import geompy
+
 from math import *
 PRECISION= 0.0005
 
