@@ -15,7 +15,7 @@ theStudy = salome.myStudy
 
 import salome_notebook
 notebook = salome_notebook.notebook
-sys.path.insert( 0, r'/home/polytux/elementsFinis/ProjetMeca')
+#sys.path.insert( 0, r'/home/polytux/elementsFinis/ProjetMeca')
 
 ###
 ### GEOM component
@@ -49,7 +49,7 @@ Position_pieds = 1280.
 Largeur_pieds  = 900.
 largeur_pieds  = 300.
 Hauteur_pieds  = 800.
-bfg = bidonFondGRC(D,L,Position_pieds,Largeur_pieds,largeur_pieds,Hauteur_pieds)
+bfg = bidonFondGRC(D,L,Position_pieds,Largeur_pieds,largeur_pieds,Hauteur_pieds,geomPy=geompy)
 
 #-----------------------------------
 #  Parametres du piquage

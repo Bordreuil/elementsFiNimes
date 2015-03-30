@@ -12,7 +12,8 @@ class geompyObjectInterface:
     def brideObject(self):
         return self._brideObj
 class piquageVirole(geompyObjectInterface):
-    def __init__(self,nom,Hpiquage,Dpiquage,Alpha,Position,Dbride,epaisseur=2.,epaisseurBride=10.):
+    def __init__(self,nom,Hpiquage,Dpiquage,Alpha,Position,Dbride,epaisseur=2.,epaisseurBride=10.,geomPy=None):
+        self._geompy = geomPy
         self._nom      = nom
         num     = re.findall('\d+',nom)[0]
         self._nomBride = 'Bride'+num
@@ -37,14 +38,15 @@ class piquageVirole(geompyObjectInterface):
     def Alpha(self):
         return self._alpha
     def buildGeompyObject(self):
-        piq,bride=creerPiquageVirole(self._position,self._hpiquage,self._alpha,self._dpiquage,self._dbride)
+        piq,bride=creerPiquageVirole(self._position,self._hpiquage,self._alpha,self._dpiquage,self._dbride,self._geompy)
         self.setGeompyObject(piq)
         self.setBrideObject(bride)
     def onPositiveSide(self):
         return self._position > 0.
     
 class piquageAxialFond(geompyObjectInterface):
-    def __init__(self,nom,Type,Hauteur,Rpiquage,Alpha,Dpiquage,Dbride,epaisseur=2.,epBride=10.):
+    def __init__(self,nom,Type,Hauteur,Rpiquage,Alpha,Dpiquage,Dbride,epaisseur=2.,epBride=10.,geomPy=None):
+        self._geompy=geomPy
         self._nom      = nom
         num     = re.findall('\d+',nom)[0]
         self._nomBride = 'Bride'+num
@@ -88,7 +90,7 @@ class piquageAxialFond(geompyObjectInterface):
                                                           self._rpiquage,
                                                           self._alpha,
                                                           self._dpiquage,
-                                                          self._dbride)
+                                                          self._dbride,self._geompy)
             self.setGeompyObject(piq)
             self.setBrideObject(brid)
         if self._type == 'Droite':
@@ -96,7 +98,7 @@ class piquageAxialFond(geompyObjectInterface):
                                                           self._rpiquage,
                                                           self._alpha,
                                                           self._dpiquage,
-                                                          self._dbride)
+                                                          self._dbride,self._geompy)
             self.setGeompyObject(piq)
             self.setBrideObject(brid)
 
@@ -108,8 +110,9 @@ class bidonFondGRC:
                       largeurPieds = 300.,
                       HauteurPieds = 800.,
                       eVirole      = 3.,
-                      eFond        = 3.):
-
+                      eFond        = 3.,
+                      geomPy       = None):
+        self._geompy        = geomPy
         self._Dvirole       = Dvirole
         self._Lvirole       = Lvirole
         self._PositionPieds = PositionPieds
@@ -119,20 +122,20 @@ class bidonFondGRC:
         self._eVirole       = eVirole
         self._eFond         = eFond
 
-        OX                  = geompy.MakeVectorDXDYDZ(1, 0, 0)
+        OX                  = self._geompy.MakeVectorDXDYDZ(1, 0, 0)
         self._Axe           = OX
-        Virole,FondG,FondD  = creerViroleEtDeuxGRC(Lvirole,Dvirole,OX)
+        Virole,FondG,FondD  = creerViroleEtDeuxGRC(Lvirole,Dvirole,OX,self._geompy)
         Pied1,Pied2         = creerPiedsEnU(PositionPieds,
                                             largeurPieds,
                                             LargeurPieds,
                                             HauteurPieds,
-                                            Dvirole)
+                                            Dvirole,self._geompy)
 
        
-        Corps = geompy.MakeCompound([Virole,
+        Corps = self._geompy.MakeCompound([Virole,
                                              FondG,
                                              FondD])
-        Virole,Pieds  = couperPiedEtBidon(Pied1,Pied2,Corps)
+        Virole,Pieds  = couperPiedEtBidon(Pied1,Pied2,Corps,self._geompy)
         self._virole  = Virole
         self._fondG   = FondG
         self._fondD   = FondD 
@@ -141,29 +144,29 @@ class bidonFondGRC:
         self._updateCorps()
 
     def _updateCorps(self):
-         self._Corps  = geompy.MakeCompound([self._virole,
+         self._Corps  = self._geompy.MakeCompound([self._virole,
                                              self._fondG,
                                              self._fondD])
     def ajouterPiquageVirole(self,nom,Hpiquage,Dpiquage,Alpha,Position,Dbride):
-        Piq2          = piquageVirole(nom,Hpiquage,Dpiquage,Alpha,Position,Dbride)
+        Piq2          = piquageVirole(nom,Hpiquage,Dpiquage,Alpha,Position,Dbride,geomPy=self._geompy)
 
         if Piq2.onPositiveSide():
             if (self.intersectOnMiddle(Piq2)):
-                Virole,Piq    = couperVirolePiquagePosCas1(Piq2.geompyObject(),self._Corps)
+                Virole,Piq    = couperVirolePiquagePosCas1(Piq2.geompyObject(),self._Corps,self._geompy)
                 self._virole  = Virole
                 print 'Virole Pos --  cas 1'
             else:
-                Virole,Piq    = couperVirolePiquagePosCas2(Piq2.geompyObject(),self._Corps)
+                Virole,Piq    = couperVirolePiquagePosCas2(Piq2.geompyObject(),self._Corps,self._geompy)
                 self._virole  = Virole
                 print 'Virole Pos --  cas 2'
             Piq2.setGeompyObject(Piq)
         else:
             if (self.intersectOnMiddle(Piq2)):
-                Virole,Piq    = couperVirolePiquageNegCas1(Piq2.geompyObject(),self._Corps)
+                Virole,Piq    = couperVirolePiquageNegCas1(Piq2.geompyObject(),self._Corps,self._geompy)
                 self._virole  = Virole
                 print 'Virole Neg -- cas 1'
             else:
-                Virole,Piq    = couperVirolePiquageNegCas2(Piq2.geompyObject(),self._Corps)
+                Virole,Piq    = couperVirolePiquageNegCas2(Piq2.geompyObject(),self._Corps,self._geompy)
                 self._virole  = Virole
                 print 'Virole Pos -- Cas 2'
             Piq2.setGeompyObject(Piq)           
@@ -174,33 +177,33 @@ class bidonFondGRC:
         return self._Dvirole/2.*sin(Piq.Alpha()) < Piq.Rpiquage()
 
     def ajouterPiquageAxialFond(self,nom,typ,Hpiquage,Dpiquage,Alpha,Rpiquage,Dbride):
-        Piq3          = piquageAxialFond(nom,typ,Hpiquage,Rpiquage,Alpha,Dpiquage,Dbride)  
+        Piq3          = piquageAxialFond(nom,typ,Hpiquage,Rpiquage,Alpha,Dpiquage,Dbride,geomPy=self._geompy)  
         cas           = self.piquageAxialCase(Piq3)
         print 'Piquage Axial -- Cas :', cas, ' Fond', typ
         if(typ == 'Gauche'):
             if cas in (1,2):
-              FondG,Piq=couperFondPiquageNegCas1Ou2(Piq3.geompyObject(),self._Corps)
+              FondG,Piq=couperFondPiquageNegCas1Ou2(Piq3.geompyObject(),self._Corps,self._geompy)
               self._fondG = FondG
               Piq3.setGeompyObject(Piq)
             if cas == 3:
-              FondG,Piq=couperFondPiquageNegCas3(Piq3.geompyObject(),self._Corps)
+              FondG,Piq=couperFondPiquageNegCas3(Piq3.geompyObject(),self._Corps,self._geompy)
               self._fondG = FondG
               Piq3.setGeompyObject(Piq)
             if cas == 4:
-              FondG,Piq=couperFondPiquageNegCas4(Piq3.geompyObject(),self._Corps)
+              FondG,Piq=couperFondPiquageNegCas4(Piq3.geompyObject(),self._Corps,self._geompy)
               self._fondG = FondG
               Piq3.setGeompyObject(Piq)
         if(typ == 'Droite'):
             if cas in (3,4):
-              FondD,Piq=couperFondPiquagePosCas3Ou4(Piq3.geompyObject(),self._Corps)
+              FondD,Piq=couperFondPiquagePosCas3Ou4(Piq3.geompyObject(),self._Corps,self._geompy)
               self._fondD = FondD
               Piq3.setGeompyObject(Piq)
             if cas == 2:
-              FondD,Piq=couperFondPiquagePosCas2(Piq3.geompyObject(),self._Corps)
+              FondD,Piq=couperFondPiquagePosCas2(Piq3.geompyObject(),self._Corps,self._geompy)
               self._fondD = FondD
               Piq3.setGeompyObject(Piq)
             if cas == 1:
-              FondD,Piq=couperFondPiquagePosCas1(Piq3.geompyObject(),self._Corps)
+              FondD,Piq=couperFondPiquagePosCas1(Piq3.geompyObject(),self._Corps,self._geompy)
               self._fondD = FondD
               Piq3.setGeompyObject(Piq)
         self._updateCorps()
@@ -244,7 +247,7 @@ class bidonFondGRC:
             comps.append(piq.geompyObject())
         for piq in self._piquages:
             comps.append(piq.brideObject())
-        return creerBidon(comps)
+        return creerBidon(comps,self._geompy)
     def genererPointComm(self,nomFichier='bidonos.comm',pression=1.):
         fid=open(nomFichier,'w')
         fid.write(bidonCommPart1)
