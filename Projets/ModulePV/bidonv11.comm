@@ -137,17 +137,17 @@ RESU1=MECA_STATIQUE(MODELE=MODELE,
 
 RESU1=CALC_CHAMP(reuse =RESU1,
                  RESULTAT=RESU1,
-                 CONTRAINTE='SIGM_ELNO',);
+                 CONTRAINTE='SIEF_ELNO',);
 
 NEUTRE=POST_CHAMP(RESULTAT=RESU1,
                   TOUT='OUI',
-                  EXTR_COQUE=_F(NOM_CHAM=('SIGM_ELNO','SIEQ_ELNO',),
+                  EXTR_COQUE=_F(NOM_CHAM=('SIEF_ELNO',),
                                 NUME_COUCHE=1,
                                 NIVE_COUCHE='MOY',),);
 
 SUP=POST_CHAMP(RESULTAT=RESU1,
                TOUT='OUI',
-               EXTR_COQUE=_F(NOM_CHAM=('SIGM_ELNO','SIEQ_ELNO',),
+               EXTR_COQUE=_F(NOM_CHAM=('SIEF_ELNO',),
                              NUME_COUCHE=1,
                              NIVE_COUCHE='SUP',),);
 
@@ -158,10 +158,10 @@ IMPR_RESU(FORMAT='MED',
           UNITE=80,
           RESU=(_F(MAILLAGE=MA,
                    RESULTAT=NEUTRE,
-                   NOM_CHAM=('SIGM_NOEU','SIEQ_NOEU',),),
+                   NOM_CHAM=('SIEF_ELNO',),),
                 _F(MAILLAGE=MA,
                    RESULTAT=SUP,
-                   NOM_CHAM=('SIGM_NOEU','SIEQ_NOEU',),),
+                   NOM_CHAM=('SIEF_ELNO',),),
                 _F(RESULTAT=RESU1,
                    NOM_CHAM='DEPL',),),);
 
