@@ -145,11 +145,19 @@ NEUTRE=POST_CHAMP(RESULTAT=RESU1,
                                 NUME_COUCHE=1,
                                 NIVE_COUCHE='MOY',),);
 
+NEUTRE=CALC_CHAMP(reuse =NEUTRE,
+                  RESULTAT=NEUTRE,
+                  CONTRAINTE='SIEF_NOEU',);
+
 SUP=POST_CHAMP(RESULTAT=RESU1,
                TOUT='OUI',
                EXTR_COQUE=_F(NOM_CHAM=('SIEF_ELNO',),
                              NUME_COUCHE=1,
                              NIVE_COUCHE='SUP',),);
+
+SUP=CALC_CHAMP(reuse =SUP,
+                  RESULTAT=SUP,
+                  CONTRAINTE='SIEF_NOEU',);
 
 #
 #	Impression des resultats au format MED. 
@@ -158,10 +166,10 @@ IMPR_RESU(FORMAT='MED',
           UNITE=80,
           RESU=(_F(MAILLAGE=MA,
                    RESULTAT=NEUTRE,
-                   NOM_CHAM=('SIEF_ELNO',),),
+                   NOM_CHAM=('SIEF_ELNO','SIEF_NOEU'),),
                 _F(MAILLAGE=MA,
                    RESULTAT=SUP,
-                   NOM_CHAM=('SIEF_ELNO',),),
+                   NOM_CHAM=('SIEF_ELNO','SIEF_NOEU'),),
                 _F(RESULTAT=RESU1,
                    NOM_CHAM='DEPL',),),);
 
