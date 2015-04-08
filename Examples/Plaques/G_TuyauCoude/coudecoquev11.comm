@@ -42,7 +42,7 @@ CHMAT=AFFE_MATERIAU(MAILLAGE=MA,
 #	triangles
 
 MODELE=AFFE_MODELE(MAILLAGE=MA,
-                   AFFE=_F(GROUP_MA='Tuyau',
+                   AFFE=_F(TOUT='OUI',
                            PHENOMENE='MECANIQUE',
                            MODELISATION='COQUE_3D',),);
 
@@ -69,8 +69,9 @@ CHARGE=AFFE_CHAR_MECA(VERI_NORM='NON',
                                    DRX=0.0,
                                    DRY=0.0,
                                    DRZ=0.0,),),
-                      FORCE_NODALE=_F(GROUP_NO='Effort',
-                                     FY=88.0,),);
+                      FORCE_ARETE=_F(GROUP_MA='Effort',
+                                     FY=88.0,),
+                      INFO=2,);
 
 #
 #	Resolution statique
@@ -140,4 +141,4 @@ IMPR_RESU(FORMAT='MED',
                    NOM_CHAM='DEPL',),),);
 
 FIN();
-#CHECKSUM:c51cea75ccba12c39aacf30559443698  -:FIN CHECKSUM
+#CHECKSUM:3dd719ef9e44a63c01ca8f4a913e4816  -:FIN CHECKSUM

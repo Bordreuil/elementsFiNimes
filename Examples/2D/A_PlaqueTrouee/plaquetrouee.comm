@@ -62,10 +62,9 @@ RESU=MECA_STATIQUE(MODELE=MODE,
                    EXCIT=_F(CHARGE=CHAR,),);
 
 
-# Extraction des resulats:
-# 	     - SIGM : Tenseur des contraintes
-#	       	    determine a partir des deplacements
-#	     - SIEQ : Contraintes equivalentes
+
+
+
 RESU=CALC_ELEM(reuse=RESU,
                RESULTAT=RESU,
                OPTION=('SIGM_ELNO','SIEQ_ELNO',),);

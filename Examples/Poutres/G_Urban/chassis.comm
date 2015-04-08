@@ -39,7 +39,7 @@ MA=LIRE_MAILLAGE(UNITE=20,
 
 # Definition du materiau et creation de la variable materiau MATER
 
-MATER=DEFI_MATERIAU(ELAS=_F(E=196200.0,
+MATER=DEFI_MATERIAU(ELAS=_F(E=196200000000.,
                             NU=0.3,),);
 
 # Affectation du materiau a tout le maillage
@@ -62,10 +62,10 @@ MODELE=AFFE_MODELE(MAILLAGE=MA,
 # la section. Ici on definit un tuyau
 
 CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
-                     POUTRE=(_F(GROUP_MA='TOUT',
-                                SECTION='CERCLE',
-                                CARA=('R','EP',),
-                                VALE=(15.,2.,),),),);
+                     POUTRE=_F(GROUP_MA='TOUT',
+                               SECTION='CERCLE',
+                               CARA=('R','EP',),
+                               VALE=(0.015,0.002,),),);
 
 # La structure a des conditions aux limites
 # Ici, les conditions de chargement sont relativement 
@@ -78,20 +78,21 @@ CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
 #  le pedalier
 #  Attention si le maillage vient de gmsh les groupes
 #  AxeAv et AxeAr sont des groupes de MA :: GROUP_NO->GROUP_MA
+
 CHARGE=AFFE_CHAR_MECA(MODELE=MODELE,
-                      DDL_IMPO=(_F(GROUP_NO='DirAv',
+                      DDL_IMPO=(_F(GROUP_NO='AxeAv',
                                    DX=0.0,
                                    DY=0.0,
                                    DZ=0.0,
                                    DRX=0.0,
                                    DRY=0.0,),
-                                _F(GROUP_NO='DirAr',
+                                _F(GROUP_NO='AxeArr',
                                    DY=0.0,
                                    DZ=0.0,
                                    DRX=0.0,
                                    DRY=0.0,),),
-                      FORCE_NODALE=(_F(GROUP_NO='Efforts',
-                                       FZ=-2000.,),),);
+                      FORCE_NODALE=_F(GROUP_NO=('Pilote1','Pilote2',),
+                                      FZ=-2000.,),);
 
 # Le calcul se deroule dans cette macro
 # Les problemes peuvent se passer lors de la resolution
@@ -121,3 +122,4 @@ IMPR_RESU(MODELE=MODELE,
                   NOM_CHAM=('DEPL','SIPO_ELNO',),),);
 
 FIN(FORMAT_HDF='OUI',);
+#CHECKSUM:3d72f43e01df02c258f998c2c94a75b3  -:FIN CHECKSUM

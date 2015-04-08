@@ -20,7 +20,7 @@
 #      Salomeca
 #     
 #      Les groupes d elements:
-#      	   - TOUT
+#      	   - Cadre
 #          - Fourche
 #          - Arr
 #          - Direct
@@ -65,14 +65,14 @@ MODELE=AFFE_MODELE(MAILLAGE=MA,
 # la section. Ici on definit un tuyau
 
 CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
-                     POUTRE=(_F(GROUP_MA='TOUT',
+                     POUTRE=(_F(GROUP_MA='Cadre',
                                 SECTION='CERCLE',
                                 CARA=('R','EP',),
-                                VALE=(15.,2.,),),
+                                VALE=(10.,2.,),),
                              _F(GROUP_MA='Direct',
                                 SECTION='CERCLE',
                                 CARA=('R','EP',),
-                                VALE=(20.,2.,),),
+                                VALE=(25.,2.,),),
                              _F(GROUP_MA='Fourche',
                                 SECTION='CERCLE',
                                 CARA=('R','EP',),
@@ -80,7 +80,7 @@ CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
                              _F(GROUP_MA='Arr',
                                 SECTION='CERCLE',
                                 CARA=('R','EP',),
-                                VALE=(10.,2.,),),),);
+                                VALE=(7.5,2.,),),),);
 
 # La structure a des conditions aux limites
 # Ici, les conditions de chargement sont relativement 

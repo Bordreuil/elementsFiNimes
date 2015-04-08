@@ -9,11 +9,12 @@ from pylab import *
 # On charge le fichier de resultat qui doit avoir
 # la structure suivante :
 # COOR_X,COOR_Y,SIXX,SIYY,XIXY 
-datas = loadtxt('contapo.dat')
+datas = loadtxt('contraintes.txt')
 # On récupère les coordonnées
 X     = datas[:,:2]
 # On calcul l'orientation du plan de gorge
-th    = arctan2(X[-1,1],X[-1,0])-pi/2.
+print 'orientation fonde gorge:',arctan2(X[-1,1],X[-1,0])
+th    = arctan2(X[0,1],X[0,0])-pi/2.
 # On cherche les indices pour avoir X croissant
 ind   = X[:,0].argsort()
 # On reorganise le tableau de coordonnees...
@@ -51,6 +52,7 @@ hold('on')
 
 # On calcul pour la formule du code de construction
 # qui suppose la contrainte constante le long du fond de gorge.
+
 epaiss      = 4.
 a           = epaiss/sqrt(2.)
 effortparmm = 5*epaiss/2.

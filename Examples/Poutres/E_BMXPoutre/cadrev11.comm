@@ -1,12 +1,12 @@
 #
 #  Prise en main Salome Meca - Code Aster
 #
-#	Le calcul nÃÂ©cessite :
+#	Le calcul nÃÂÃÂ©cessite :
 #	   - ce fichier .comm
 #          - un fichier .med (maillage, que l on peut generer
 #                             avec salome meca ou gmsh) que l on 
 #			      affectera a l unite 20.
-#		Ce fichier peut ÃÂªtre crÃÂ©ÃÂ© ÃÂ  partir du fichier .geo
+#		Ce fichier peut ÃÂÃÂªtre crÃÂÃÂ©ÃÂÃÂ© ÃÂÃÂ  partir du fichier .geo
 #                 fourni et de gmsh ou a partir du script
 #                 python fournit dans le repertoire et en le chargeant dans
 #                 salome-meca
@@ -129,7 +129,7 @@ RESU1=CALC_CHAMP(reuse =RESU1,
                  CARA_ELEM=CAREL,
                  RESULTAT=RESU1,
                  TOUT='OUI',
-                 CONTRAINTE=('SIPO_ELNO'),
+                 CONTRAINTE=('SIPO_ELNO','SIEF_ELNO',),
                  FORCE='REAC_NODA',);
 
 # puis ecrit dans le fichier de resultat .rmed
@@ -138,7 +138,7 @@ RESU1=CALC_CHAMP(reuse =RESU1,
 
 IMPR_RESU(FORMAT='MED',
           RESU=_F(RESULTAT=RESU1,
-                  NOM_CHAM=('DEPL','SIPO_ELNO',),),);
+                  NOM_CHAM=('DEPL','SIPO_ELNO','SIEF_ELNO',),),);
 
 FIN(FORMAT_HDF='OUI',);
-#CHECKSUM:ede25161c387504ed27ca15a579d8cd7  -:FIN CHECKSUM
+#CHECKSUM:540d5deda668c4e837ba2eae7e159eeb  -:FIN CHECKSUM

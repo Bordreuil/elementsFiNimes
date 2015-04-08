@@ -64,7 +64,7 @@ CH1=AFFE_CHAR_MECA(MODELE=MODE,
 
 CH2=AFFE_CHAR_MECA(MODELE=MODE,
                    PRES_REP=_F(GROUP_MA='Haut',
-                               PRES=-150.0,),);
+                               PRES=-160.0,),);
 
 # ----> Definition de la resolution du probleme 
 # 	non lineaire et de sa resolution en temps
@@ -102,6 +102,7 @@ RESU=STAT_NON_LINE(MODELE=MODE,
 RESU=CALC_CHAMP(reuse =RESU,
                 RESULTAT=RESU,
                 CONTRAINTE='SIEF_ELNO',
+                DEFORMATION=('EPSP_ELNO','EPSP_NOEU',),
                 CRITERES='SIEQ_ELNO',);
 
 RESU=CALC_CHAMP(reuse =RESU,
@@ -115,7 +116,7 @@ IMPR_RESU(FORMAT='MED',
           UNITE=80,
           RESU=_F(MAILLAGE=MAIL,
                   RESULTAT=RESU,
-                  NOM_CHAM=('SIEF_NOEU','SIEQ_NOEU','DEPL',),),);
+                  NOM_CHAM=('SIEF_NOEU','SIEQ_NOEU','DEPL','EPSP_NOEU',),),);
 
 # -----> Extraction des contraintes le long de la symetrie
 #        pour avoir la concentration
@@ -140,4 +141,4 @@ IMPR_TABLE(TABLE=T_RESU,
            NOM_PARA=('COOR_X','SIYY',),);
 
 FIN();
-#CHECKSUM:92023f7f2b5823fab1e2e5376046b6dd  -:FIN CHECKSUM
+#CHECKSUM:9046512a71953ca37596d79ace404654  -:FIN CHECKSUM

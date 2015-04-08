@@ -3,6 +3,20 @@
 *.lo
 *.o
 *.py~
+*.pyc
+*.*~
+# Aster analyse file
+*.rmed
+*.mess
+*.base
+*.resu
+*.mmed
+*.astk
+*.export
+*.hdf
+*.log
+*.csv 
+*.dat
 # Compiled Dynamic libraries
 *.so
 

@@ -10,24 +10,27 @@ import salome
 import sys
 sys.path.append('/home/bordreuil/Enseignement/elementsFiNimes/Tools')
 salome.salome_init()
-theStudy = salome.myStudy
+from salome.geom import geomBuilder
+#global geompy
+geompy = geomBuilder.New(salome.myStudy)
+#theStudy = salome.myStudy
 
 import salome_notebook
 notebook = salome_notebook.notebook
-sys.path.insert( 0, r'/home/polytux/elementsFinis/ProjetMeca')
+#sys.path.insert( 0, r'/home/polytux/elementsFinis/ProjetMeca')
 
 ###
 ### GEOM component
 ###
 
 import GEOM
-import geompy
+#import geompy
 import math
 import SALOMEDS
 from   numpy import *
 from   bidonChar import *
 
-geompy.init_geom(theStudy)
+#geompy.init_geom(theStudy)
 O = geompy.MakeVertex(0, 0, 0)
 OX = geompy.MakeVectorDXDYDZ(1, 0, 0)
 OY = geompy.MakeVectorDXDYDZ(0, 1, 0)
@@ -42,7 +45,7 @@ OZ = geompy.MakeVectorDXDYDZ(0, 0, 1)
 D = 1600.
 L = 4000.
 
-Virole,FondG,FondD = creerViroleEtDeuxGRC(L,D,OX)
+Virole,FondG,FondD = creerViroleEtDeuxGRC(L,D,OX,geompy)
 
 #-----------------------------------
 #  Création des pieds
@@ -56,12 +59,12 @@ largeur_pieds  = 300.
 Hauteur_pieds  = 800.
 
 
-Pied1,Pied2 = creerPiedsEnU(Position_pieds,largeur_pieds,Largeur_pieds,Hauteur_pieds,D)
+Pied1,Pied2 = creerPiedsEnU(Position_pieds,largeur_pieds,Largeur_pieds,Hauteur_pieds,D,geompy)
 
 Corps  = geompy.MakeCompound([Virole,FondG,FondD])
 
-Virole,Pieds = couperPiedEtBidon(Pied1,Pied2,Corps)
-Corps        = geompy.MakeCompound([Virole,FondG,FondD])
+Virole,Pieds = couperPiedEtBidon(Pied1,Pied2,Corps,geompy)
+Corps        = geompy.MakeCompound([Virole,FondG,FondD],geompy)
 
 #-----------------------------------
 #  Creation du piquage
@@ -76,10 +79,10 @@ Alpha    = 90.
 Position = 1300.
 Dbride   = 600.
 
-Piq1          = creerPiquageVirole(Position,H,Alpha,Dp,Dbride)
-Virole,Piq1   = couperVirolePiquagePos(Piq1,Corps)
+Piq1          = creerPiquageVirole(Position,H,Alpha,Dp,Dbride,geompy)
+Virole,Piq1   = couperVirolePiquagePos(Piq1,Corps,geompy)
 
-Corps  = geompy.MakeCompound([Virole,FondG,FondD])
+Corps  = geompy.MakeCompound([Virole,FondG,FondD],geompy)
 
 H        = 1000.
 Dp       = 300.
@@ -87,10 +90,10 @@ Alpha    = -45.
 Position = -800.
 Dbride   = 400.
 
-Piq2          = creerPiquageVirole(Position,H,Alpha,Dp,Dbride)
-Virole,Piq2   = couperVirolePiquageNeg(Piq2,Corps)
+Piq2          = creerPiquageVirole(Position,H,Alpha,Dp,Dbride,geompy)
+Virole,Piq2   = couperVirolePiquageNeg(Piq2,Corps,geompy)
 
-Corps  = geompy.MakeCompound([Virole,FondG,FondD])
+Corps  = geompy.MakeCompound([Virole,FondG,FondD],geompy)
 
 Hauteur_P2 = 2500.
 R_piquage  = 600.
@@ -98,13 +101,13 @@ Alpha      = 45.
 Dpiquage2  = 300.
 Dpbride2   = 400.
 
-Piq3          = creerPiquageFondAxialPos(Hauteur_P2,R_piquage,Alpha,Dpiquage2,Dpbride2)
-FondD,Piq3    = couperFondPiquagePosCas2(Piq3,Corps)
-Corps         = geompy.MakeCompound([Virole,FondG,FondD])
+Piq3          = creerPiquageFondAxialPos(Hauteur_P2,R_piquage,Alpha,Dpiquage2,Dpbride2,geompy)
+FondD,Piq3    = couperFondPiquagePosCas2(Piq3,Corps,geompy)
+Corps         = geompy.MakeCompound([Virole,FondG,FondD],geompy)
 Alpha         = 135.
 R_piquage     = 300.
-Piq4          = creerPiquageFondAxialPos(Hauteur_P2,R_piquage,Alpha,Dpiquage2,Dpbride2)
-FondD,Piq4    = couperFondPiquagePosCas3Ou4(Piq4,Corps)
+Piq4          = creerPiquageFondAxialPos(Hauteur_P2,R_piquage,Alpha,Dpiquage2,Dpbride2,geompy)
+FondD,Piq4    = couperFondPiquagePosCas3Ou4(Piq4,Corps,geompy)
 
 Corps  = geompy.MakeCompound([Virole,FondG,FondD])
 Hauteur_P2 = 2400.
@@ -113,9 +116,9 @@ Alpha      = 0.
 Dpiquage2  = 250.
 Dpbride2   = 300.
 
-Piq5         = creerPiquageFondAxialPos(Hauteur_P2,R_piquage,Alpha,Dpiquage2,Dpbride2)
-FondD,Piq5    = couperFondPiquagePosCas1(Piq5,Corps)
-Corps         = geompy.MakeCompound([Virole,FondG,FondD])
+Piq5         = creerPiquageFondAxialPos(Hauteur_P2,R_piquage,Alpha,Dpiquage2,Dpbride2,geompy)
+FondD,Piq5    = couperFondPiquagePosCas1(Piq5,Corps,geompy)
+Corps         = geompy.MakeCompound([Virole,FondG,FondD],geompy)
 
 Hauteur_P2 = 2750.
 R_piquage  = 00.
@@ -123,8 +126,8 @@ Alpha      = 0.
 Dpiquage2  = 100.
 Dpbride2   = 200.
 
-Piq6          = creerPiquageFondAxialPos(Hauteur_P2,R_piquage,Alpha,Dpiquage2,Dpbride2)
-FondD,Piq6    = couperFondPiquagePosCas3Ou4(Piq6,Corps)
+Piq6          = creerPiquageFondAxialPos(Hauteur_P2,R_piquage,Alpha,Dpiquage2,Dpbride2,geompy)
+FondD,Piq6    = couperFondPiquagePosCas3Ou4(Piq6,Corps,geompy)
 Corps         = geompy.MakeCompound([Virole,FondG,FondD])
 
 Hauteur_P2 = -2750.
@@ -133,11 +136,11 @@ Alpha      = 0.
 Dpiquage2  = 300.
 Dpbride2   = 400.
 
-Piq7          = creerPiquageFondAxialNeg(Hauteur_P2,R_piquage,Alpha,Dpiquage2,Dpbride2)
-FondG,Piq7    = couperFondPiquageNegCas1Ou2(Piq7,Corps)
+Piq7          = creerPiquageFondAxialNeg(Hauteur_P2,R_piquage,Alpha,Dpiquage2,Dpbride2,geompy)
+FondG,Piq7    = couperFondPiquageNegCas1Ou2(Piq7,Corps,geompy)
 Corps         = geompy.MakeCompound([Virole,FondG,FondD])
 
-Bidon,groupes = creerBidon([FondG,FondD,Virole,Pieds,Piq1,Piq2,Piq3,Piq4,Piq5,Piq6,Piq7])
+Bidon,groupes = creerBidon([FondG,FondD,Virole,Pieds,Piq1,Piq2,Piq3,Piq4,Piq5,Piq6,Piq7],geompy)
 #-----------------------------------
 #  Création du bidon
 #-----------------------------------
