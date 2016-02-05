@@ -1,0 +1,249 @@
+# 
+#
+#	Simulation numerique soudage multipasses
+#	Determination des contraintes residuelles
+#
+#	modelisation mecanique simplifiee de la passe
+#	procede 141
+#	passe 1
+#	
+#
+#
+#
+#------------------------------------------------------------------
+#                       CALCUL ASTER
+#-------------------------------------------------------------------
+# Pour poursuivre un calcul, il faut lui le dossier .base du resultat
+# que l'on veut poursuivre. cf figure astk_poursuite.png
+
+POURSUITE();
+
+# Lecture du maillage
+
+MA2=LIRE_MAILLAGE(UNITE=20,FORMAT='MED');
+
+
+
+# Definition des instants de calcul pour une analyse non lineraire
+
+M_DIFF1=DEFI_LIST_REEL(DEBUT=0.0,
+                      INTERVALLE=_F(JUSQU_A=2,
+                                    NOMBRE=5,),);
+
+M_DIFF2=DEFI_LIST_REEL(DEBUT=2.0,
+                       INTERVALLE=(_F(JUSQU_A=4.0,
+                                      NOMBRE=200,),
+                                   _F(JUSQU_A=200.0,
+                                      NOMBRE=100,),),);
+M_SAUV1=DEFI_LIST_REEL(DEBUT=0.0,
+                      INTERVALLE=_F(JUSQU_A=2,
+                                    NOMBRE=1,),);
+
+M_SAUV2=DEFI_LIST_REEL(DEBUT=2.0,
+                       INTERVALLE=(_F(JUSQU_A=200.0,
+                                      NOMBRE=1,),),);
+
+MECA=AFFE_MODELE(MAILLAGE=MA2,
+                   VERIF='MAILLE',
+                   AFFE=_F(TOUT='OUI',
+                           PHENOMENE='MECANIQUE',
+                           MODELISATION='AXIS',),);
+
+# Projection des champs du modele MODELE provenant de therm_p1.comm
+# sur le modele de mecanique MECA
+# Dans l affectation du modele le maillage est defini, il est donc envisageable
+# d'avoir deux maillages et de projeter un resultat sur l'autre maillage.
+PROJ_TH=PROJ_CHAMP(RESULTAT=TEMPCHA,
+                   MODELE_1=MODELE,
+                   MODELE_2=MECA,
+                   VIS_A_VIS=_F(TOUT_1='OUI',
+                                TOUT_2='OUI',),);
+#                                CAS_FIGURE='3D',),);
+
+
+
+CTRA=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(0.0014568528,287.,
+                          1.,787.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+
+# Dependance du module d Young en fonction de la temperature
+
+
+#DILAT=DEFI_FONCTION(     NOM_PARA='TEMP',
+                          #  PROL_DROITE='CONSTANT',
+      			   # PROL_GAUCHE='CONSTANT',
+                                 # VALE=(  20.,  15.9e-6,
+                                  #       100.,  16.4e-6,
+				#	 200., 17e-6,
+				#	 300., 17.5e-6,
+				#	 400., 17.9e-6,
+				#	 500., 18.3e-6,
+				#	 600., 18.7e-6,
+				#	 700., 19e-6,
+				#	 800., 19.4e-6,
+				#	 900., 19.6e-6,
+				#	 1000., 19.8e-6,
+				#	 1100., 19.8e-6,
+				#	 1200., 19.8e-6 )
+                         #)
+DILAT=DEFI_CONSTANTE( VALE=15.9e-6)
+
+POISSON = DEFI_CONSTANTE( VALE=0.3)
+
+YOUNG=DEFI_FONCTION(     NOM_PARA='TEMP',
+                            PROL_DROITE='CONSTANT',
+      			    PROL_GAUCHE='CONSTANT',
+                                  VALE=(  20., 197000.,
+                                         100., 191500.,
+					 200., 184000.,
+					 300., 176500.,
+					 400., 168000.,
+					 500., 160000.,
+					 600., 151500.,
+					 700., 142500.,
+					 800., 130000.,
+					 900., 108000.,
+					 1000., 81500.,
+					 1100., 32000.,
+					 1200., 7400. )
+                         )
+
+
+# Affectation des proprietes materiau 
+# L elasticite est une fonction de la temperature mot cle ELAS_FO
+#   on rentre ensuite les fonctions definies precedemment
+
+INOXM=DEFI_MATERIAU(ELAS_FO=_F(E=YOUNG,
+                          NU=POISSON,
+                          ALPHA=DILAT,
+			  TEMP_DEF_ALPHA=20.),
+                  TRACTION=_F(SIGM=CTRA,),);
+
+
+YOUNGAIR = DEFI_CONSTANTE( VALE=50)
+CTRAIR=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(1.,50.,
+                          2.,50.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+DILATAIR = DEFI_CONSTANTE( VALE=0.e-6)
+AIRM=DEFI_MATERIAU(ELAS_FO=_F(E=YOUNGAIR,
+                          NU=POISSON,
+                          ALPHA=DILATAIR,
+			  TEMP_DEF_ALPHA=20.),
+			TRACTION=_F(SIGM=CTRAIR,),);
+    
+
+
+# Affectation des proprietes materiaux
+# a tout le maillage
+# Le champ de temperature est une variable qu il faut 
+# affecter au niveau de l affectation du materiau
+CME=AFFE_MATERIAU(MAILLAGE=MA2,
+                    AFFE=(_F(GROUP_MA=('Tole_ga','Tole_dr','ENVERS','PASSE_1',),
+                           MATER=INOXM,),
+                         _F(GROUP_MA=('PASSE_2','PASSE_3','PASSE_4','PASSE_5','PASSE_6','PASSE_7',),
+                           MATER=AIRM,),),
+               	    AFFE_VARC=(_F(GROUP_MA=('Tole_ga','Tole_dr','ENVERS','PASSE_1',),
+                           	#MATER=INOXM,
+				NOM_VARC='TEMP',
+                                 EVOL=PROJ_TH,
+                                 VALE_REF=20.,),
+                              _F(GROUP_MA=('PASSE_2','PASSE_3','PASSE_4','PASSE_5','PASSE_6','PASSE_7',),
+                               # MATER=AIRM,
+                                 NOM_VARC='TEMP',
+                                 EVOL=PROJ_TH,
+                                 VALE_REF=20.,),),);
+
+# Definition du chargement mecanique
+CHARM=AFFE_CHAR_MECA(MODELE=MECA,
+                     DDL_IMPO=(_F(GROUP_MA='Bride',
+                                  DX=0.,
+                                  DY=0.,),),);
+
+
+# Resolution statique non lineaire
+# Pour la resolution du probleme non lineaire,
+# on resoud le problemen en considerant un probleme
+# plastique avec ecrouissage isotrope donne par la courbe de traction : 
+# VMIS_ISOT_TRAC 
+#
+# Pour la resolution non lineaire, on resoud la methode de Newton
+# en calculant la matrice tangente a chaque iteration
+# INCREMENT est le mot cle pour controle les instants de calcul
+# si, le pas de temps entre deux increments est trop long, on peut 
+# avoir non convergence du calcul
+DU=STAT_NON_LINE(MODELE=MECA,
+                 CHAM_MATER=CME,
+                 EXCIT=_F(CHARGE=CHARM,),
+                 COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
+		 NEWTON=_F(REAC_INCR=1,
+                               MATRICE='TANGENTE',
+                               REAC_ITER=50,
+                               REAC_ITER_ELAS=50),
+ 	         CONVERGENCE=_F(ITER_GLOB_MAXI=200,RESI_GLOB_MAXI=1000.),
+                 INCREMENT=_F(LIST_INST=M_DIFF1,),
+		 ARCHIVAGE=_F(LIST_INST=M_SAUV1,),);
+
+DU=STAT_NON_LINE(reuse=DU,
+		 MODELE=MECA,
+                 CHAM_MATER=CME,
+                 EXCIT=_F(CHARGE=CHARM,),
+                 COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
+		 NEWTON=_F(REAC_INCR=1,
+                               MATRICE='TANGENTE',
+                               REAC_ITER=50,
+                               REAC_ITER_ELAS=50),
+	         CONVERGENCE=_F(ITER_GLOB_MAXI=200,RESI_GLOB_MAXI=5500.),
+                 INCREMENT=_F(LIST_INST=M_DIFF2,),
+		 ARCHIVAGE=_F(LIST_INST=M_SAUV2,),
+	         ETAT_INIT=_F(EVOL_NOLI=DU),);
+
+# POST_TRAITEMENT POUR OBTENIR LES FLUX AUX NOEUDS ET
+# L'INDICATEUR D'ERREUR THERMIQUE EN RESIDU.
+
+# Extraction des resulats:
+# 	     - SIGM : Tenseur des contraintes
+#	       	    determine a partir des deplacements
+#	     - SIEQ : Contraintes equivalentes
+DU=CALC_CHAMP(CRITERES=('SIEQ_ELNO',),
+                CONTRAINTE=('SIEF_ELNO',),
+                reuse=DU,
+               RESULTAT=DU,);
+
+# Moyennation au niveau des noeuds pour la visualisation
+DU=CALC_CHAMP(CRITERES=( 'SIEQ_NOEU',),
+                CONTRAINTE=('SIEF_NOEU',),
+                reuse=DU,
+               RESULTAT=DU,);
+
+#DU=CALC_ELEM(reuse =DU1,
+#             RESULTAT=DU1,
+#             TYPE_OPTION='TOUTES',
+#             OPTION=('SIEF_ELNO','VARI_ELNO','SIEQ_ELNO'),);
+
+#DU=CALC_NO(reuse =DU,
+#           RESULTAT=DU,
+#           OPTION=('SIEF_NOEU','VARI_NOEU','SIEQ_NOEU'));
+
+
+# Impression des resultats. GROUP_MA permet d'imprimer les resultats uniquement 
+# dans les groupes inox
+
+IMPR_RESU(FORMAT='MED',
+          UNITE=80,
+          RESU=_F(MAILLAGE=MA2,
+                  RESULTAT=DU,
+                  NOM_CHAM=('SIEF_NOEU','SIEQ_NOEU','DEPL'),
+                  GROUP_MA=('Tole_ga','Tole_dr','ENVERS','PASSE_1','PASSE_2',),),);
+#                _F(RESULTAT=TEMP,
+#                   NOM_CHAM='TEMP',),),);
+
+FIN(INFO_RESU='OUI',RETASSAGE='OUI',);
+#CHECKSUM:0869e7cc000957d504e49f562041e2fc  -:FIN CHECKSUM

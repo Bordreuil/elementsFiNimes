@@ -1,0 +1,137 @@
+# 
+#
+#	Simulation numerique soudage multipasses
+#	Determination des contraintes residuelles
+#
+#	modelisation mecanique simplifiee de la passe
+#	procede 141
+#	passe 2
+#	
+#
+#
+#
+#------------------------------------------------------------------
+#                       CALCUL ASTER
+#-------------------------------------------------------------------
+# Pour poursuivre un calcul, il faut lui le dossier .base du resultat
+# que l'on veut poursuivre. cf figure astk_poursuite.png
+
+POURSUITE();
+
+# Definition des instants de calcul pour une analyse non lineraire
+
+M_DIFF3=DEFI_LIST_REEL(DEBUT=200.,
+                      INTERVALLE=_F(JUSQU_A=202.,
+                                    NOMBRE=1,),);
+
+M_DIFF4=DEFI_LIST_REEL(DEBUT=202.0,
+                       INTERVALLE=(_F(JUSQU_A=204.0,
+                                      NOMBRE=200,),
+                                   _F(JUSQU_A=400.0,
+                                      NOMBRE=50,),),);
+
+M_SAUV3=DEFI_LIST_REEL(DEBUT=200.0,
+                      INTERVALLE=_F(JUSQU_A=202,
+                                    NOMBRE=1,),);
+
+M_SAUV4=DEFI_LIST_REEL(DEBUT=202.0,
+                       INTERVALLE=(_F(JUSQU_A=400.0,
+                                      NOMBRE=1,),),);
+
+
+CME2=AFFE_MATERIAU(MAILLAGE=MA2,
+                    AFFE=(_F(GROUP_MA=('Tole_ga','Tole_dr','ENVERS','PASSE_1','PASSE_2',),
+                           MATER=INOXM,),
+                         _F(GROUP_MA=('PASSE_3','PASSE_4','PASSE_5','PASSE_6','PASSE_7',),
+                           MATER=AIRM,),),
+               	    AFFE_VARC=(_F(GROUP_MA=('Tole_ga','Tole_dr','ENVERS','PASSE_1','PASSE_2',),
+                           	#MATER=INOXM,
+				NOM_VARC='TEMP',
+                                 EVOL=PROJ_TH,
+                                 VALE_REF=20.,),
+                              _F(GROUP_MA=('PASSE_3','PASSE_4','PASSE_5','PASSE_6','PASSE_7',),
+                               # MATER=AIRM,
+                                 NOM_VARC='TEMP',
+                                 EVOL=PROJ_TH,
+                                 VALE_REF=20.,),),);
+
+# Projection des champs du modele MODELE provenant de therm_p1.comm
+# sur le modele de mecanique MECA
+# Dans l affectation du modele le maillage est defini, il est donc envisageable
+# d'avoir deux maillages et de projeter un resultat sur l'autre maillage.
+
+# Affectation des proprietes materiaux
+# a tout le maillage
+# Le champ de temperature est une variable qu il faut 
+# affecter au niveau de l affectation du materiau
+
+# Resolution statique non lineaire
+# Pour la resolution du probleme non lineaire,
+# on resoud le problemen en considerant un probleme
+# plastique avec ecrouissage isotrope donne par la courbe de traction : 
+# VMIS_ISOT_TRAC 
+#
+# Pour la resolution non lineaire, on resoud la methode de Newton
+# en calculant la matrice tangente a chaque iteration
+# INCREMENT est le mot cle pour controle les instants de calcul
+# si, le pas de temps entre deux increments est trop long, on peut 
+# avoir non convergence du calcul
+DU=STAT_NON_LINE(reuse=DU,
+		 MODELE=MECA,
+                 CHAM_MATER=CME,
+                 EXCIT=_F(CHARGE=CHARM,),
+                 COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
+		 NEWTON=_F(REAC_INCR=1,
+                               MATRICE='TANGENTE',
+                               REAC_ITER=250,
+                               REAC_ITER_ELAS=250),
+ 	         CONVERGENCE=_F(ITER_GLOB_MAXI=300,RESI_GLOB_MAXI=25000.),
+                 INCREMENT=_F(LIST_INST=M_DIFF3,),
+		 ARCHIVAGE=_F(LIST_INST=M_SAUV3,),
+	         ETAT_INIT=_F(EVOL_NOLI=DU),);
+#DU=STAT_NON_LINE(reuse=DU,
+#		 MODELE=MECA,
+#                 CHAM_MATER=CME,
+#                 EXCIT=_F(CHARGE=CHARM,),
+#                 COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
+#		 NEWTON=_F(REAC_INCR=1,
+#                               MATRICE='TANGENTE',
+#                               REAC_ITER=250,
+#                               REAC_ITER_ELAS=250),
+# 	         CONVERGENCE=_F(ITER_GLOB_MAXI=250,RESI_GLOB_MAXI=30000.),
+#                 INCREMENT=_F(LIST_INST=M_DIFF4,),
+#		 ARCHIVAGE=_F(LIST_INST=M_SAUV4,),
+#	         ETAT_INIT=_F(EVOL_NOLI=DU),);
+
+# POST_TRAITEMENT POUR OBTENIR LES FLUX AUX NOEUDS ET
+# L'INDICATEUR D'ERREUR THERMIQUE EN RESIDU.
+
+# Extraction des resulats:
+# 	     - SIGM : Tenseur des contraintes
+#	       	    determine a partir des deplacements
+#	     - SIEQ : Contraintes equivalentes
+DU=CALC_CHAMP(CRITERES=('SIEQ_ELNO',),
+                CONTRAINTE=('SIEF_ELNO',),
+                reuse=DU,
+               RESULTAT=DU,);
+
+# Moyennation au niveau des noeuds pour la visualisation
+DU=CALC_CHAMP(CRITERES=( 'SIEQ_NOEU',),
+                CONTRAINTE=('SIEF_NOEU',),
+                reuse=DU,
+               RESULTAT=DU,);
+
+# Impression des resultats. GROUP_MA permet d'imprimer les resultats uniquement 
+# dans les groupes inox
+
+IMPR_RESU(FORMAT='MED',
+          UNITE=80,
+          RESU=_F(MAILLAGE=MA2,
+                  RESULTAT=DU,
+                  NOM_CHAM=('SIEF_NOEU','SIEQ_NOEU','DEPL'),
+                  GROUP_MA=('Tole_ga','Tole_dr','ENVERS','PASSE_1','PASSE_2',),),);
+#                _F(RESULTAT=TEMP,
+#                   NOM_CHAM='TEMP',),),);
+
+FIN(INFO_RESU='OUI',RETASSAGE='OUI',);
+#CHECKSUM:0869e7cc000957d504e49f562041e2fc  -:FIN CHECKSUM

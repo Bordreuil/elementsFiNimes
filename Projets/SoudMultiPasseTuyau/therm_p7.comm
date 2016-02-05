@@ -1,0 +1,94 @@
+# 
+#
+#	Simulation numerique soudage multipasses
+#	Determination des contraintes residuelles
+#
+#	modelisation thermique simplifiee de la passe
+#	procede 141
+#	passe 7
+#	
+#
+#
+#
+#------------------------------------------------------------------
+#                       CALCUL ASTER
+#-------------------------------------------------------------------
+
+POURSUITE();
+
+# Definition de la fonction pour application de la temperature 
+# dans une passe
+
+MULT7=DEFI_FONCTION(
+                   NOM_PARA='INST',
+                   VALE=(600.0 ,0.0 ,
+                         600.25 ,1.0 ,
+                         602.0 ,1.0 ,),);
+
+# Le matériau est défini dans therm_p1
+
+# Definition des instants de calcul pour une analyse de thermique
+
+T_CHAUF7=DEFI_LIST_REEL(DEBUT=600.0,
+                        INTERVALLE=_F(JUSQU_A=602.0,
+                                      NOMBRE=20,),);
+
+T_DIFF7=DEFI_LIST_REEL(DEBUT=600.0,
+                      INTERVALLE=_F(JUSQU_A=700.0,
+                                    NOMBRE=200,),);
+
+# Le modele de thermique est défini dans therm_p1
+
+# Affectation du materiau a notre plaque
+
+MAT7=AFFE_MATERIAU(MAILLAGE=MA1,
+                  AFFE=(_F(GROUP_MA=('Tole_ga','Tole_dr','ENVERS','PASSE_1','PASSE_2','PASSE_3','PASSE_4','PASSE_5','PASSE_6','PASSE_7',),
+                           MATER=INOX,),),);
+
+# Definition d une temperature initiale de la passe en cours
+
+TEMPIMP7=AFFE_CHAR_THER(MODELE=MODELE,
+                        TEMP_IMPO=_F(GROUP_MA=('PASSE_7',),
+                                     TEMP=1700.0,),);
+
+# Calcul thermique transitoire pour le maintien 
+# de la premiere passe en fusion
+
+TEMPCHA=THER_LINEAIRE(reuse=TEMPCHA,
+		      MODELE=MODELE,
+                      CHAM_MATER=MAT7,
+                      EXCIT=(_F(CHARGE=TEMPIMP7,
+                                FONC_MULT=MULT7,),
+                             _F(CHARGE=CONV,),),
+                      ETAT_INIT=_F(EVOL_THER=TEMPCHA,),
+                      INCREMENT=_F(LIST_INST=T_CHAUF7,),
+                      SOLVEUR=_F(METHODE='MULT_FRONT',
+                                 RENUM='METIS',
+                                 NPREC=8,
+                                 STOP_SINGULIER='OUI',),);
+
+# Calcul thermique transitoire pour le refroidissement
+# Au depart ETAT_INIT, on reprend les resultats de fin de chauffe
+
+TEMPCHA=THER_LINEAIRE(reuse=TEMPCHA,
+		       MODELE=MODELE,
+                       CHAM_MATER=MAT7,
+                       EXCIT=_F(CHARGE=CONV,),
+                       ETAT_INIT=_F(EVOL_THER=TEMPCHA,),
+                       INCREMENT=_F(LIST_INST=T_DIFF7,),
+                       SOLVEUR=_F(METHODE='MULT_FRONT',
+                                  RENUM='METIS',
+                                  NPREC=8,
+                                  STOP_SINGULIER='OUI',),);
+
+# Impression des resultats. GROUP_MA permet d'imprimer les resultats uniquement 
+# dans les groupes inox
+
+IMPR_RESU(FORMAT='MED',
+          RESU=_F(MAILLAGE=MA1,
+                  RESULTAT=TEMPCHA,
+                  NOM_CHAM='TEMP',
+                  GROUP_MA=('Tole_ga','Tole_dr','ENVERS','PASSE_1','PASSE_2','PASSE_3','PASSE_4','PASSE_5','PASSE_6','PASSE_7',),),);
+
+FIN();
+#CHECKSUM:48457579db931938ca7ef3b4704de393  -:FIN CHECKSUM
