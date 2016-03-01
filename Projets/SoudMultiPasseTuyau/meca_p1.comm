@@ -31,18 +31,22 @@ M_DIFF1=DEFI_LIST_REEL(DEBUT=0.0,
                                     NOMBRE=5,),);
 
 M_DIFF2=DEFI_LIST_REEL(DEBUT=2.0,
-                       INTERVALLE=(_F(JUSQU_A=4.0,
-                                      NOMBRE=200,),
-                                   _F(JUSQU_A=200.0,
+                       INTERVALLE=(_F(JUSQU_A=2.5,
+                                      NOMBRE=10,),));
+M_DIFF3=DEFI_LIST_REEL(DEBUT=2.5,
+                       INTERVALLE=(
+                                   _F(JUSQU_A=100.0,
                                       NOMBRE=100,),),);
 M_SAUV1=DEFI_LIST_REEL(DEBUT=0.0,
                       INTERVALLE=_F(JUSQU_A=2,
                                     NOMBRE=1,),);
 
 M_SAUV2=DEFI_LIST_REEL(DEBUT=2.0,
-                       INTERVALLE=(_F(JUSQU_A=200.0,
+                       INTERVALLE=(_F(JUSQU_A=2.5,
                                       NOMBRE=1,),),);
-
+M_SAUV3=DEFI_LIST_REEL(DEBUT=2.5,
+                       INTERVALLE=(_F(JUSQU_A=100.0,
+                                      NOMBRE=2,),),);
 MECA=AFFE_MODELE(MAILLAGE=MA2,
                    VERIF='MAILLE',
                    AFFE=_F(TOUT='OUI',
@@ -62,38 +66,135 @@ PROJ_TH=PROJ_CHAMP(RESULTAT=TEMPCHA,
 
 
 
-CTRA=DEFI_FONCTION(
+#CTRA=DEFI_FONCTION(
+#                    NOM_PARA='EPSI',
+#                    VALE=(0.0014568528,287.,
+#                          1.,787.,
+#                          ),
+#                    PROL_DROITE='CONSTANT',);
+
+# Definition des courbes de traction pour une température donnée
+
+CTR20=DEFI_FONCTION(
                     NOM_PARA='EPSI',
                     VALE=(0.0014568528,287.,
-                          1.,787.,
+                          1.,288.,
                           ),
                     PROL_DROITE='CONSTANT',);
 
+CTR100=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(0.0012375979,237.,
+                          1.,238.,
+                          ),
+                   PROL_DROITE='CONSTANT',);
 
+CTR200=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(0.001076087,198.,
+                          1.,199.,
+                          ),
+                   PROL_DROITE='CONSTANT',);
+
+CTR300=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.745042493e-4,172.,
+                          1.,173.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR400=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.345238095e-4,157.,
+                          1.,158.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR500=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.9669967e-4,151.,
+                          1.,152.,
+                          ),
+                   PROL_DROITE='CONSTANT',);
+
+CTR600=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.570957096e-4,145.,
+                          1.,146.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR700=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.543859649e-4,136.,
+                          1.,137.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR800=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.769230769e-4,127.,
+                          1.,128.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR900=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(0.0010648148,115.,
+                          1.,116.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR1000=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.693251534e-4,79.,
+                          1.,80.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR1100=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(0.0011875,38.,
+                          1.,39.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR1200=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(0.0032432432,24.,
+                          1.,25.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTRA=DEFI_NAPPE(NOM_PARA='TEMP',
+	PARA=(20,100,200,300,400,500,600,700,800,900,1000,1100,1200,),
+	FONCTION=(CTR20,CTR100,CTR200,CTR300,CTR400,CTR500,CTR600,CTR700,CTR800,CTR900,CTR1000,CTR1100,CTR1200,),
+	PROL_DROITE='CONSTANT',
+	PROL_GAUCHE='CONSTANT',);
 # Dependance du module d Young en fonction de la temperature
 
 
-#DILAT=DEFI_FONCTION(     NOM_PARA='TEMP',
-                          #  PROL_DROITE='CONSTANT',
-      			   # PROL_GAUCHE='CONSTANT',
-                                 # VALE=(  20.,  15.9e-6,
-                                  #       100.,  16.4e-6,
-				#	 200., 17e-6,
-				#	 300., 17.5e-6,
-				#	 400., 17.9e-6,
-				#	 500., 18.3e-6,
-				#	 600., 18.7e-6,
-				#	 700., 19e-6,
-				#	 800., 19.4e-6,
-				#	 900., 19.6e-6,
-				#	 1000., 19.8e-6,
-				#	 1100., 19.8e-6,
-				#	 1200., 19.8e-6 )
-                         #)
-DILAT=DEFI_CONSTANTE( VALE=15.9e-6)
+DILAT=DEFI_FONCTION(     NOM_PARA='TEMP',
+                            PROL_DROITE='CONSTANT',
+      			    PROL_GAUCHE='CONSTANT',
+                                  VALE=(  20.,  15.9e-6,
+                                         100.,  16.4e-6,
+					 200., 17e-6,
+					 300., 17.5e-6,
+					 400., 17.9e-6,
+					 500., 18.3e-6,
+					 600., 18.7e-6,
+					 700., 19e-6,
+					 800., 19.4e-6,
+					 900., 19.6e-6,
+					 1000., 19.8e-6,
+					 1100., 19.8e-6,
+					 1200., 19.8e-6 )
+                         )
+#DILAT=DEFI_CONSTANTE( VALE=4.e-6)
 
 POISSON = DEFI_CONSTANTE( VALE=0.3)
-
+#YOUNG = DEFI_CONSTANTE( VALE=150000.)
 YOUNG=DEFI_FONCTION(     NOM_PARA='TEMP',
                             PROL_DROITE='CONSTANT',
       			    PROL_GAUCHE='CONSTANT',
@@ -187,7 +288,7 @@ DU=STAT_NON_LINE(MODELE=MECA,
                                MATRICE='TANGENTE',
                                REAC_ITER=50,
                                REAC_ITER_ELAS=50),
- 	         CONVERGENCE=_F(ITER_GLOB_MAXI=200,RESI_GLOB_MAXI=1000.),
+ 	         CONVERGENCE=_F(ITER_GLOB_MAXI=200,RESI_GLOB_MAXI=5000.),
                  INCREMENT=_F(LIST_INST=M_DIFF1,),
 		 ARCHIVAGE=_F(LIST_INST=M_SAUV1,),);
 
@@ -198,13 +299,26 @@ DU=STAT_NON_LINE(reuse=DU,
                  COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
 		 NEWTON=_F(REAC_INCR=1,
                                MATRICE='TANGENTE',
-                               REAC_ITER=50,
-                               REAC_ITER_ELAS=50),
-	         CONVERGENCE=_F(ITER_GLOB_MAXI=200,RESI_GLOB_MAXI=5500.),
+                               REAC_ITER=20,
+                               REAC_ITER_ELAS=250),
+	         CONVERGENCE=_F(ITER_GLOB_MAXI=200,RESI_GLOB_MAXI=10000),
                  INCREMENT=_F(LIST_INST=M_DIFF2,),
 		 ARCHIVAGE=_F(LIST_INST=M_SAUV2,),
 	         ETAT_INIT=_F(EVOL_NOLI=DU),);
 
+DU=STAT_NON_LINE(reuse=DU,
+		 MODELE=MECA,
+                 CHAM_MATER=CME,
+                 EXCIT=_F(CHARGE=CHARM,),
+                 COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
+		 NEWTON=_F(REAC_INCR=1,
+                               MATRICE='TANGENTE',
+                               REAC_ITER=20,
+                               REAC_ITER_ELAS=250),
+	         CONVERGENCE=_F(ITER_GLOB_MAXI=200,RESI_GLOB_MAXI=2000),
+                 INCREMENT=_F(LIST_INST=M_DIFF3,),
+		 ARCHIVAGE=_F(LIST_INST=M_SAUV3,),
+	         ETAT_INIT=_F(EVOL_NOLI=DU),);
 # POST_TRAITEMENT POUR OBTENIR LES FLUX AUX NOEUDS ET
 # L'INDICATEUR D'ERREUR THERMIQUE EN RESIDU.
 
@@ -214,12 +328,14 @@ DU=STAT_NON_LINE(reuse=DU,
 #	     - SIEQ : Contraintes equivalentes
 DU=CALC_CHAMP(CRITERES=('SIEQ_ELNO',),
                 CONTRAINTE=('SIEF_ELNO',),
+		DEFORMATION=('EPSP_ELNO'),
                 reuse=DU,
                RESULTAT=DU,);
 
 # Moyennation au niveau des noeuds pour la visualisation
 DU=CALC_CHAMP(CRITERES=( 'SIEQ_NOEU',),
                 CONTRAINTE=('SIEF_NOEU',),
+		DEFORMATION=('EPSP_NOEU'),
                 reuse=DU,
                RESULTAT=DU,);
 
@@ -240,7 +356,7 @@ IMPR_RESU(FORMAT='MED',
           UNITE=80,
           RESU=_F(MAILLAGE=MA2,
                   RESULTAT=DU,
-                  NOM_CHAM=('SIEF_NOEU','SIEQ_NOEU','DEPL'),
+                  NOM_CHAM=('SIEF_NOEU','SIEQ_NOEU','DEPL','EPSP_NOEU'),
                   GROUP_MA=('Tole_ga','Tole_dr','ENVERS','PASSE_1','PASSE_2',),),);
 #                _F(RESULTAT=TEMP,
 #                   NOM_CHAM='TEMP',),),);

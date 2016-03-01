@@ -20,22 +20,22 @@ POURSUITE();
 
 # Definition des instants de calcul pour une analyse non lineraire
 
-M_DIFF3=DEFI_LIST_REEL(DEBUT=200.,
-                      INTERVALLE=_F(JUSQU_A=202.,
+M_DIFF4=DEFI_LIST_REEL(DEBUT=100.,
+                      INTERVALLE=_F(JUSQU_A=101.5,
                                     NOMBRE=1,),);
 
-M_DIFF4=DEFI_LIST_REEL(DEBUT=202.0,
-                       INTERVALLE=(_F(JUSQU_A=204.0,
-                                      NOMBRE=200,),
-                                   _F(JUSQU_A=400.0,
+M_DIFF5=DEFI_LIST_REEL(DEBUT=102.0,
+                       INTERVALLE=(_F(JUSQU_A=104.0,
+                                      NOMBRE=1,),
+                                   _F(JUSQU_A=200.0,
                                       NOMBRE=50,),),);
 
-M_SAUV3=DEFI_LIST_REEL(DEBUT=200.0,
-                      INTERVALLE=_F(JUSQU_A=202,
+M_SAUV4=DEFI_LIST_REEL(DEBUT=100.0,
+                      INTERVALLE=_F(JUSQU_A=101.5,
                                     NOMBRE=1,),);
 
-M_SAUV4=DEFI_LIST_REEL(DEBUT=202.0,
-                       INTERVALLE=(_F(JUSQU_A=400.0,
+M_SAUV5=DEFI_LIST_REEL(DEBUT=102.0,
+                       INTERVALLE=(_F(JUSQU_A=200.0,
                                       NOMBRE=1,),),);
 
 
@@ -78,30 +78,30 @@ CME2=AFFE_MATERIAU(MAILLAGE=MA2,
 # avoir non convergence du calcul
 DU=STAT_NON_LINE(reuse=DU,
 		 MODELE=MECA,
-                 CHAM_MATER=CME,
+                 CHAM_MATER=CME2,
                  EXCIT=_F(CHARGE=CHARM,),
                  COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
 		 NEWTON=_F(REAC_INCR=1,
                                MATRICE='TANGENTE',
-                               REAC_ITER=250,
-                               REAC_ITER_ELAS=250),
- 	         CONVERGENCE=_F(ITER_GLOB_MAXI=300,RESI_GLOB_MAXI=25000.),
-                 INCREMENT=_F(LIST_INST=M_DIFF3,),
-		 ARCHIVAGE=_F(LIST_INST=M_SAUV3,),
+                               REAC_ITER=50,
+                               REAC_ITER_ELAS=50),
+ 	         CONVERGENCE=_F(ITER_GLOB_MAXI=300,RESI_GLOB_MAXI=1000.),
+                 INCREMENT=_F(LIST_INST=M_DIFF4,),
+		 ARCHIVAGE=_F(LIST_INST=M_SAUV4,),
 	         ETAT_INIT=_F(EVOL_NOLI=DU),);
-#DU=STAT_NON_LINE(reuse=DU,
-#		 MODELE=MECA,
-#                 CHAM_MATER=CME,
-#                 EXCIT=_F(CHARGE=CHARM,),
-#                 COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
-#		 NEWTON=_F(REAC_INCR=1,
-#                               MATRICE='TANGENTE',
-#                               REAC_ITER=250,
-#                               REAC_ITER_ELAS=250),
-# 	         CONVERGENCE=_F(ITER_GLOB_MAXI=250,RESI_GLOB_MAXI=30000.),
-#                 INCREMENT=_F(LIST_INST=M_DIFF4,),
-#		 ARCHIVAGE=_F(LIST_INST=M_SAUV4,),
-#	         ETAT_INIT=_F(EVOL_NOLI=DU),);
+DU=STAT_NON_LINE(reuse=DU,
+		 MODELE=MECA,
+                 CHAM_MATER=CME2,
+                 EXCIT=_F(CHARGE=CHARM,),
+                 COMP_INCR=_F(RELATION='VMIS_ISOT_TRAC',),
+		 NEWTON=_F(REAC_INCR=1,
+                               MATRICE='TANGENTE',
+                               REAC_ITER=50,
+                               REAC_ITER_ELAS=50),
+ 	         CONVERGENCE=_F(ITER_GLOB_MAXI=250,RESI_GLOB_MAXI=1000.),
+                 INCREMENT=_F(LIST_INST=M_DIFF5,),
+		 ARCHIVAGE=_F(LIST_INST=M_SAUV5,),
+	         ETAT_INIT=_F(EVOL_NOLI=DU),);
 
 # POST_TRAITEMENT POUR OBTENIR LES FLUX AUX NOEUDS ET
 # L'INDICATEUR D'ERREUR THERMIQUE EN RESIDU.
@@ -112,12 +112,14 @@ DU=STAT_NON_LINE(reuse=DU,
 #	     - SIEQ : Contraintes equivalentes
 DU=CALC_CHAMP(CRITERES=('SIEQ_ELNO',),
                 CONTRAINTE=('SIEF_ELNO',),
+		DEFORMATION=('EPSP_ELNO'),
                 reuse=DU,
                RESULTAT=DU,);
 
 # Moyennation au niveau des noeuds pour la visualisation
 DU=CALC_CHAMP(CRITERES=( 'SIEQ_NOEU',),
                 CONTRAINTE=('SIEF_NOEU',),
+		DEFORMATION=('EPSP_NOEU'),
                 reuse=DU,
                RESULTAT=DU,);
 
@@ -128,7 +130,7 @@ IMPR_RESU(FORMAT='MED',
           UNITE=80,
           RESU=_F(MAILLAGE=MA2,
                   RESULTAT=DU,
-                  NOM_CHAM=('SIEF_NOEU','SIEQ_NOEU','DEPL'),
+                  NOM_CHAM=('SIEF_NOEU','SIEQ_NOEU','DEPL','EPSP_NOEU'),
                   GROUP_MA=('Tole_ga','Tole_dr','ENVERS','PASSE_1','PASSE_2',),),);
 #                _F(RESULTAT=TEMP,
 #                   NOM_CHAM='TEMP',),),);

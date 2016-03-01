@@ -62,7 +62,7 @@ MODELE=AFFE_MODELE(MAILLAGE=MA,
 CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
                      INFO=2,
                      COQUE=(_F(GROUP_MA='Virole',
-                               EPAIS=3.0,),
+                               EPAIS=6.0,),
                             _F(GROUP_MA=('FondG','FondD',),
                                EPAIS=3.0,),
                             _F(GROUP_MA='Piquage1',
@@ -137,27 +137,30 @@ RESU1=MECA_STATIQUE(MODELE=MODELE,
 
 RESU1=CALC_CHAMP(reuse =RESU1,
                  RESULTAT=RESU1,
-                 CONTRAINTE='SIEF_ELNO',);
+                 CONTRAINTE='SIEF_ELNO',
+		 CRITERES = 'SIEQ_ELNO');
 
 NEUTRE=POST_CHAMP(RESULTAT=RESU1,
                   TOUT='OUI',
-                  EXTR_COQUE=_F(NOM_CHAM=('SIEF_ELNO',),
+                  EXTR_COQUE=_F(NOM_CHAM=('SIEF_ELNO','SIEQ_ELNO'),
                                 NUME_COUCHE=1,
                                 NIVE_COUCHE='MOY',),);
 
+
 NEUTRE=CALC_CHAMP(reuse =NEUTRE,
                   RESULTAT=NEUTRE,
+		  CRITERES='SIEQ_NOEU',
                   CONTRAINTE='SIEF_NOEU',);
 
 SUP=POST_CHAMP(RESULTAT=RESU1,
                TOUT='OUI',
-               EXTR_COQUE=_F(NOM_CHAM=('SIEF_ELNO',),
+               EXTR_COQUE=_F(NOM_CHAM='SIEF_ELNO',
                              NUME_COUCHE=1,
                              NIVE_COUCHE='SUP',),);
 
 SUP=CALC_CHAMP(reuse =SUP,
-                  RESULTAT=SUP,
-                  CONTRAINTE='SIEF_NOEU',);
+               RESULTAT=SUP,
+               CONTRAINTE='SIEF_NOEU',);
 
 #
 #	Impression des resultats au format MED. 
@@ -166,12 +169,12 @@ IMPR_RESU(FORMAT='MED',
           UNITE=80,
           RESU=(_F(MAILLAGE=MA,
                    RESULTAT=NEUTRE,
-                   NOM_CHAM=('SIEF_ELNO','SIEF_NOEU'),),
+                   NOM_CHAM=('SIEF_ELNO','SIEF_NOEU','SIEQ_NOEU'),),
                 _F(MAILLAGE=MA,
                    RESULTAT=SUP,
-                   NOM_CHAM=('SIEF_ELNO','SIEF_NOEU'),),
+                   NOM_CHAM=('SIEF_ELNO','SIEF_NOEU',),),
                 _F(RESULTAT=RESU1,
                    NOM_CHAM='DEPL',),),);
 
 FIN();
-#CHECKSUM:abaddb0d3b18126f0995560b427064e1  -:FIN CHECKSUM
+#CHECKSUM:305d3cc432f6a003635a18fd93b38836  -:FIN CHECKSUM

@@ -33,7 +33,7 @@ T_CHAUF2=DEFI_LIST_REEL(DEBUT=100.,
                         INTERVALLE=_F(JUSQU_A=101.5,
                                       NOMBRE=20,),);
 
-T_DIFF2=DEFI_LIST_REEL(DEBUT=101.5,
+T_DIFF2=DEFI_LIST_REEL(DEBUT=201.5,
                       INTERVALLE=_F(JUSQU_A=200.,
                                     NOMBRE=200,),);
 
