@@ -1,0 +1,211 @@
+# 
+#
+#	Modelisation thermo mecanique simplifie
+#	d une operation de soudage sur un tube
+#
+#
+#
+
+# Géométrie
+D_ext = 406.4 
+Epaisseur = 12.7
+
+# Données de soudage
+#vitesse en mm/min
+vito = 1000
+#vitesse en rad/s
+#vit = (vito/(2*3.14*((D_ext-Epaisseur)/2)))*1/60=0.84666836	   
+vit = 2*3.14/((3.14*(D_ext-Epaisseur))/(vito/60))	   
+# Angle de départ de la source
+To = 3.14/2
+# Définition des instants de soudage
+tmaintien = 1.
+tdecalage = 20.
+tfin      = 60.
+# Paramètres de soudage
+ETA = 0.7
+U = 24
+I = 250
+#Définition du rayon d'application de la source de chaleur
+R1 = (D_ext-Epaisseur)/2
+#Définition des constantes pour la forme du flux
+ah = 5.
+bh = 5.
+ch = 3.
+#Décalage de la deuxième source
+Distance = 50
+T1 = - atan( Distance / (D_ext/2)) + To
+#Décalage des deux autres sources
+T2 = To
+T3 = atan( Distance / (D_ext/2))+ T2
+
+#Définition des sources de chaleur
+def gaussien(X,Y,Z,t,FY):
+        X1 = (X-R1*cos(To))
+        Y1 = (Y-R1*sin(To))
+        Z1 = Z
+        X2 = cos(To)*X1+sin(To)*Y1 
+        Y2 = cos(To)*Y1-sin(To)*X1 
+        Z2 = Z1
+        X3 = (X-R1*cos(To+vit*(t-tmaintien)))
+        Y3 = (Y-R1*sin(To+vit*(t-tmaintien))) 
+        X4 = cos(To+vit*(t-tmaintien))*X3+sin(To+vit*(t-tmaintien))*Y3
+        Y4 = cos(To+vit*(t-tmaintien))*Y3-sin(To+vit*(t-tmaintien))*X3
+        Q=((6*sqrt(3)*ETA*U*I)/((ah*bh*ch)*3.1*sqrt(3.1)))*exp(-((3*X4**2/ch**2)+(3*Y4**2/ah**2)+(3*(Z)**2/bh**2)))
+        if(t< tmaintien):
+         	 Q=((6*sqrt(3)*ETA*U*I)/((ah*bh*ch)*3.1*sqrt(3.1)))*exp(-((3*X2**2/ch**2)+(3*Y2**2/ah**2)+(3*Z2**2/bh**2)))
+        if(t > tfin):
+        	    Q=0.
+        return Q
+
+def gaussien2(X,Y,Z,t,FY):
+        X1 = (X-R1*cos(T1))
+        Y1 = (Y-R1*sin(T1))
+        Z1 = Z
+        X2 = cos(T1)*X1+sin(T1)*Y1 
+        Y2 = cos(T1)*Y1-sin(T1)*X1 
+        Z2 = Z1
+        X3 = (X-R1*cos(T1+vit*(t-tmaintien)))
+        Y3 = (Y-R1*sin(T1+vit*(t-tmaintien))) 
+        X4 = cos(T1+vit*(t-tmaintien))*X3+sin(T1+vit*(t-tmaintien))*Y3
+        Y4 = cos(T1+vit*(t-tmaintien))*Y3-sin(T1+vit*(t-tmaintien))*X3
+        Q=((6*sqrt(3)*ETA*U*I)/((ah*bh*ch)*3.1*sqrt(3.1)))*exp(-((3*X4**2/ch**2)+(3*Y4**2/ah**2)+(3*(Z)**2/bh**2)))
+        if(t< tmaintien):
+         	 Q=((6*sqrt(3)*ETA*U*I)/((ah*bh*ch)*3.1*sqrt(3.1)))*exp(-((3*X2**2/ch**2)+(3*Y2**2/ah**2)+(3*Z2**2/bh**2)))
+        if(t > tfin):
+        	    Q=0.
+        return Q
+
+def gaussien3(X,Y,Z,t,FY):
+        X1 = (X-R1*cos(T2))
+        Y1 = (Y-R1*sin(T2))
+        Z1 = Z
+        X2 = cos(T2)*X1+sin(T2)*Y1 
+        Y2 = cos(T2)*Y1-sin(T2)*X1 
+        Z2 = Z1
+        X3 = (X-R1*cos(T2-vit*(t-tmaintien-tdecalage)))
+        Y3 = (Y-R1*sin(T2-vit*(t-tmaintien-tdecalage))) 
+        X4 = cos(T2-vit*(t-tmaintien))*X3+sin(T2-vit*(t-tmaintien-tdecalage))*Y3
+        Y4 = cos(T2-vit*(t-tmaintien))*Y3-sin(T2-vit*(t-tmaintien-tdecalage))*X3
+        Q=((6*sqrt(3)*ETA*U*I)/((ah*bh*ch)*3.1*sqrt(3.1)))*exp(-((3*X4**2/ch**2)+(3*Y4**2/ah**2)+(3*(Z)**2/bh**2)))
+        if(t< tdecalage + tmaintien):
+         	 Q=((6*sqrt(3)*ETA*U*I)/((ah*bh*ch)*3.1*sqrt(3.1)))*exp(-((3*X2**2/ch**2)+(3*Y2**2/ah**2)+(3*Z2**2/bh**2)))
+        if(t > tfin):
+        	    Q=0.
+        if(t < tdecalage):
+        	    Q=0.
+        return Q
+
+def gaussien4(X,Y,Z,t,FY):
+        X1 = (X-R1*cos(T3))
+        Y1 = (Y-R1*sin(T3))
+        Z1 = Z
+        X2 = cos(T3)*X1+sin(T3)*Y1 
+        Y2 = cos(T3)*Y1-sin(T3)*X1 
+        Z2 = Z1
+        X3 = (X-R1*cos(T3-vit*(t-tmaintien-tdecalage)))
+        Y3 = (Y-R1*sin(T3-vit*(t-tmaintien-tdecalage))) 
+        X4 = cos(T3-vit*(t-tmaintien))*X3+sin(T3-vit*(t-tmaintien-tdecalage))*Y3
+        Y4 = cos(T3-vit*(t-tmaintien))*Y3-sin(T3-vit*(t-tmaintien-tdecalage))*X3
+        Q=((6*sqrt(3)*ETA*U*I)/((ah*bh*ch)*3.1*sqrt(3.1)))*exp(-((3*X4**2/ch**2)+(3*Y4**2/ah**2)+(3*(Z)**2/bh**2)))
+        if(t< tdecalage + tmaintien):
+         	 Q=((6*sqrt(3)*ETA*U*I)/((ah*bh*ch)*3.1*sqrt(3.1)))*exp(-((3*X2**2/ch**2)+(3*Y2**2/ah**2)+(3*Z2**2/bh**2)))
+        if(t > tfin):
+        	    Q=0.
+        if(t < tdecalage):
+        	    Q=0.
+        return Q
+
+#------------------------------------------------------------------
+#                       CALCUL ASTER
+#-------------------------------------------------------------------
+DEBUT();
+
+MA=LIRE_MAILLAGE(UNITE=20,
+                 FORMAT='MED',);
+
+# Definition du materiau
+# Les unites ont ete bascule pour que l unite de longueur soit le mm
+
+ACIER_T=DEFI_MATERIAU(THER=_F(LAMBDA=0.0502,
+                              RHO_CP=0.00392,),);
+
+# Definition des instants de calcul pour une analyse non lineraire
+
+L_INST=DEFI_LIST_REEL(DEBUT=0.0,
+                      INTERVALLE=(_F(JUSQU_A=26,
+                                     NOMBRE=78,),
+                                  _F(JUSQU_A=27,
+                                     NOMBRE=3,),),);
+
+# Affectation du modele de thermique
+
+MODELE=AFFE_MODELE(MAILLAGE=MA,
+                   AFFE=_F(TOUT='OUI',
+                           PHENOMENE='THERMIQUE',
+                           MODELISATION='3D',),);
+
+# Affectation du materiau a notre plaque
+
+MAT=AFFE_MATERIAU(MAILLAGE=MA,
+                  AFFE=_F(TOUT='OUI',
+                          MATER=ACIER_T,),);
+
+# Definition des flux sur la piece
+
+aussien1 = FORMULE(VALE='gaussien(X,Y,Z,INST,500.)',
+                   NOM_PARA=('X','Y','Z','INST',),);
+
+aussien2 = FORMULE(VALE='gaussien2(X,Y,Z,INST,500.)',
+                   NOM_PARA=('X','Y','Z','INST',),);
+
+aussien3 = FORMULE(VALE='gaussien3(X,Y,Z,INST,500.)',
+                   NOM_PARA=('X','Y','Z','INST',),);
+
+aussien4 = FORMULE(VALE='gaussien4(X,Y,Z,INST,500.)',
+                   NOM_PARA=('X','Y','Z','INST',),);
+
+FLUTHER=AFFE_CHAR_THER_F(MODELE=MODELE,
+                         SOURCE=_F(GROUP_MA='Sym',
+                                   SOUR=aussien1,),);
+
+FLUTHER2=AFFE_CHAR_THER_F(MODELE=MODELE,
+                         SOURCE=_F(GROUP_MA='Sym',
+                                   SOUR=aussien2,),);
+
+FLUTHER3=AFFE_CHAR_THER_F(MODELE=MODELE,
+                         SOURCE=_F(GROUP_MA='Sym',
+                                   SOUR=aussien3,),);
+
+FLUTHER4=AFFE_CHAR_THER_F(MODELE=MODELE,
+                         SOURCE=_F(GROUP_MA='Sym',
+                                   SOUR=aussien4,),);
+
+
+# Definition echange avec l'air
+ECH=AFFE_CHAR_THER(MODELE=MODELE,
+                   ECHANGE=_F(TOUT='OUI',
+                              COEF_H=3e-05,
+                              TEMP_EXT=50.0,),);
+# Calcul thermique transitoire
+# Les resultats sont dans l objet TEMP
+
+TEMP=THER_LINEAIRE(MODELE=MODELE,
+                   CHAM_MATER=MAT,
+                   EXCIT=(_F(CHARGE=FLUTHER,),
+                          _F(CHARGE=FLUTHER2,),
+                          _F(CHARGE=FLUTHER3,),
+                          _F(CHARGE=FLUTHER4,),),
+                   ETAT_INIT=_F(VALE=50.0,),
+                   INCREMENT=_F(LIST_INST=L_INST,),
+                   SOLVEUR=_F(METHODE='MULT_FRONT',
+                              RENUM='METIS',
+                              NPREC=8,
+                              STOP_SINGULIER='OUI',),);
+
+IMPR_RESU(FORMAT='MED',
+          RESU=_F(RESULTAT=TEMP,
+                  NOM_CHAM='TEMP',),);
+
+FIN();
+#CHECKSUM:f06d42296a1888f76e8e30adfc5d1f65  -:FIN CHECKSUM
