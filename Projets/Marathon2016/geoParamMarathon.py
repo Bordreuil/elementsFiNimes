@@ -36,7 +36,7 @@ OY_1 = geompy.MakeVectorDXDYDZ(0, 1, 0)
 OZ_1 = geompy.MakeVectorDXDYDZ(0, 0, 1)
 
 lFixInt  = 90.
-lEco     = 230.
+lEco     = 250.
 LArrRenf = 363.
 LArrRoue = 620.
 LAvRenf  = 140.
@@ -44,7 +44,7 @@ LAvAxe   = 910.
 LAvRoue  = 1070.
 lAvAxe   = 225.
 ZPlat    = 120.
-ZArceau  = 350.     
+ZArceau  = ZPlat+lEco     
 Sommet_1 = geompy.MakeVertex(0, 0, 0)
 Sommet_2 = geompy.MakeVertex(lFixInt, 0, 0)
 Sommet_3 = geompy.MakeVertex(lEco, 0, 0)
