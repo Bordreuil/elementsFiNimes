@@ -61,7 +61,7 @@ geompy.UnionIDs(Fin, [2])
 centre = geompy.CreateGroup(Plaque, geompy.ShapeType["EDGE"])
 geompy.UnionIDs(centre, [4, 9])
 ext = geompy.CreateGroup(Plaque, geompy.ShapeType["EDGE"])
-geompy.UnionIDs(ext, [16])
+geompy.UnionIDs(ext, [19])
 
 geompy.addToStudy( O, 'O' )
 geompy.addToStudy( OX, 'OX' )

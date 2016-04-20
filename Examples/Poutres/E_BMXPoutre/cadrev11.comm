@@ -1,12 +1,12 @@
 #
 #  Prise en main Salome Meca - Code Aster
 #
-#	Le calcul nÃÂÃÂ©cessite :
+#	Le calcul nÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©cessite :
 #	   - ce fichier .comm
 #          - un fichier .med (maillage, que l on peut generer
 #                             avec salome meca ou gmsh) que l on 
 #			      affectera a l unite 20.
-#		Ce fichier peut ÃÂÃÂªtre crÃÂÃÂ©ÃÂÃÂ© ÃÂÃÂ  partir du fichier .geo
+#		Ce fichier peut ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂªtre crÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ© ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ  partir du fichier .geo
 #                 fourni et de gmsh ou a partir du script
 #                 python fournit dans le repertoire et en le chargeant dans
 #                 salome-meca
@@ -80,7 +80,11 @@ CAREL=AFFE_CARA_ELEM(MODELE=MODELE,
                              _F(GROUP_MA='Arr',
                                 SECTION='CERCLE',
                                 CARA=('R','EP',),
-                                VALE=(5.0,2.0,),),),);
+                                VALE=(5.0,2.0,),),
+                             _F(GROUP_MA='TubBas',
+                                SECTION='CERCLE',
+                                CARA=('R','EP',),
+                                VALE=(30.0,2.0,),),),);
 
 # La structure a des conditions aux limites
 # Ici, les conditions de chargement sont relativement 
@@ -141,4 +145,4 @@ IMPR_RESU(FORMAT='MED',
                   NOM_CHAM=('DEPL','SIPO_ELNO','SIEF_ELNO',),),);
 
 FIN(FORMAT_HDF='OUI',);
-#CHECKSUM:540d5deda668c4e837ba2eae7e159eeb  -:FIN CHECKSUM
+#CHECKSUM:7db7c6500c49278073e8a30fe5912782  -:FIN CHECKSUM
