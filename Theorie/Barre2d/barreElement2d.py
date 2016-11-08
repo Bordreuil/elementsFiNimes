@@ -25,7 +25,7 @@ class barre2D:
     def calculContrainte(self,dep):
         Q=self.matricePassage()
         duloc=dot(Q,dep)
-        deformation=(duloc[2]-duloc[1])/self._length
+        deformation=(duloc[2]-duloc[0])/self._length
         return self._young*deformation
     def stiffness(self):
     
