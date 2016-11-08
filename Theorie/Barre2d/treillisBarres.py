@@ -53,9 +53,6 @@ for el in els:
     K=assembMatrix(K,k,ddls)
 
 #printMatrix(K[4:,4:])
-plotNodes(coords)
-plotElements(coords,els)
-show()
 axis([-100,3500,-1600.,2000.])
 print '--------Resolution'
 du=solve(K[4:,4:],F[4:])
