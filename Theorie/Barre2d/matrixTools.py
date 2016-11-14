@@ -24,18 +24,34 @@ def listActiveDofs(nddls,dofsImposed):
       return ddlsActive
 
 def assembMatrix(K,kel,ddls):
+      """
+      Realise l assemblage de la matrice elementaire
+      dans la matrice globale pour les ddls
+      """
       for i,dd in enumerate(ddls):
         for j,kk in enumerate(ddls):
             K[dd,kk] += kel[i,j]
       return K
 
 def sliceMatrix(K,ddx,ddy):
+    """
+    """
     Kout= zeros((len(ddx),len(ddy)))
     for i,dx in enumerate(ddx):
         for j,dy in enumerate(ddy):
             Kout[i,j] = K[dx,dy]
     return Kout
-
+def imposedDofsOnMatrixAndRhs(K,F,ddlsImposed,values):
+      """
+      Impose des ddls avec certaines valeurs en modifiant la 
+      matrice de rigidite globale
+      """
+      assert(len(values)==len(ddlsImposed))
+      for ii,i in enumerate(ddlsImposed):
+            K[i,:] = 0.
+            K[i,i] = 1.
+            F[i]   = values[ii]
+      return K,F
 def printMatrix(K):
     for i in range(K.shape[0]):
         ligne=''
