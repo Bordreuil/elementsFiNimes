@@ -1,0 +1,19 @@
+lc       = 10.;
+ld       = 5.;
+lp       = 100.;
+Lp       = 400.;
+R        = 25.;
+Point(1) = {0.,0.,0.,lc};
+Point(2) = {lp,0.,0.,lc};
+Point(3) = {lp,Lp,0.,lc};
+Point(4) = {0.,Lp,0.,lc};
+Point(5) = {lp/2.,Lp/2.,0.,ld};
+Point(6) = {lp/2.+R,Lp/2.,0.,ld};
+Line(1)  = {1,2};
+Line(2)  = {2,3};
+Line(3)  = {3,4};
+Line(4)  = {4,1};
+
+Circle(5) = {6, 5, 6};
+Line Loop(8) = {2, 3, 4, 1, -5};
+Plane Surface(8) = {8};
