@@ -44,7 +44,7 @@ class resultsFile:
         polydata.Modified()
         writer = vtk.vtkXMLPolyDataWriter()
         writer.SetFileName(self._fname)
-        writer.SetInputData(polydata)
+        writer.SetInput(polydata)
         writer.Write()
         
 def plotElements(coords,els):
