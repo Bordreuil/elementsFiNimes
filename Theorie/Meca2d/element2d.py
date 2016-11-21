@@ -70,7 +70,7 @@ class TriangleMeca2d:
         for i in range(pts.shape[0]):
             B = self.matrixB(pts[i,0],pts[i,1])
             E = self.matrixE()
-            J = self.J(pts[i,0],pts[i,1])
+            J = self.J(pts[i,0],pts[i,1])*0.5
             K+=dot(transpose(B),dot(E,B))*weights[i]*J
         return K
         
@@ -100,3 +100,16 @@ class TriangleMeca2d:
         dN[1,0] = -1.;dN[1,1] = 0.;dN[1,2] = 1.
         
         return dN
+    def computeStressesInElement(self,du):
+        B = self.matrixB(0.,0.)
+        E = self.matrixE()
+        sigmas = dot(E,dot(B,du))
+        return sigmas
+    def _computeStressesAtGaussPoints(self,du):
+        pts = self.gausspoints()
+        stressesAtGP=zeros((pts.shape[0],3),'d')
+        E = self.matrixE()
+        for i in range(pts.shape[0]):
+            B = self.matrixB(pts[i,0],pts[i,1])
+            stressesAtGP[i,:] = dot(E,dot(B,du))
+        return stressesAtGP

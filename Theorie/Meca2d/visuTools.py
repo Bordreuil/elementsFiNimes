@@ -23,13 +23,24 @@ class resultsFile:
         datas.SetName(name)
         for value in fieldValues:
             datas.InsertNextTuple2(value[0],value[1])
+        self._resultsPoint.append(datas)
+    def addVectorToCell(self,fieldValues,name):
+        datas = vtk.vtkDoubleArray()
+        datas.SetNumberOfComponents(3)
+        datas.SetName(name)
+        for value in fieldValues:
+            datas.InsertNextTuple3(value[0],value[1],value[2])
         self._resultsCell.append(datas)
+
     def write(self):
         polydata = vtk.vtkPolyData()
         polydata.SetPoints(self._points)
         polydata.SetPolys(self._triangles)
-        for ptData in self._resultsCell:
+        for ptData in self._resultsPoint:
             polydata.GetPointData().AddArray(ptData)
+        for cellData in self._resultsCell:
+            polydata.GetCellData().AddArray(cellData)
+            
         polydata.Modified()
         writer = vtk.vtkXMLPolyDataWriter()
         writer.SetFileName(self._fname)
