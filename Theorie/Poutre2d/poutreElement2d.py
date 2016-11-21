@@ -1,6 +1,6 @@
 from pylab import *
 from numpy import *
-
+from matrixTools import *
 class poutre2D:
     def __init__(self,nodes,L,E,A,I,th):
         self._nodes  = nodes
@@ -39,11 +39,12 @@ class poutre2D:
         L  = self._length
         Ct = A*L**2/I
         k  = E*I/L**3.*array([[Ct ,0.  ,0.      ,-Ct ,0.   ,0.],
-                              [0. ,12. ,6*L     ,0.  ,-12  ,6.*L],
-                              [0. ,6.*L,4.*L**2.,0.  ,6.*L ,2.*L**2.],
+                              [0. ,12. ,6.*L    ,0.  ,-12  ,6.*L],
+                              [0. ,6.*L,4.*L**2.,0.  ,-6.*L ,2.*L**2.],
                               [-Ct,0.  ,0.      ,Ct  ,0.   ,0.    ],
                               [0.,-12.,-6.*L    ,0.  ,12.  , -6.*L],
                               [0.,6.*L,2.*L**2  ,0.  ,-6.*L,4.*L**2.]],'d')
+
         Q=self.matricePassage()
         K=dot(transpose(Q),dot(k,Q))
         return K
