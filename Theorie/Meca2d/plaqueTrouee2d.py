@@ -47,7 +47,7 @@ Du[:,1] = du[1::2]
 sigmas  = []
 for el in els:
     ddls = el.ddls()
-    sigmas.append(el.computeStresses(du[ddls]))
+    sigmas.append(el.computeStressesInElement(du[ddls]))
 
 
 resFile = resultsFile("plaquetrouee.vtp")
