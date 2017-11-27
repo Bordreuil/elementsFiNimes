@@ -12,33 +12,38 @@ print '-------Definition du maillage'
 
 coords =array([[0.,0.],                       
                [0.,L_barre],
+               [L_barre,0.],
                [L_barre,L_barre],
-               [L_barre,2.*L_barre],
-               [2.*L_barre,L_barre],        
-               [2.*L_barre,2.*L_barre],      
-               [3.*L_barre,L_barre],
-               [3.*L_barre,0.]]   ,'d') 
+               [3./2.*L_barre,L_barre/2.],        
+               [2.*L_barre,0.],      
+               [2.*L_barre,L_barre],
+               [3.*L_barre,0.],
+               [3.*L_barre,L_barre]]   ,'d') 
 
 Du  = zeros(coords.shape,'d')
 
-
+s2 = sqrt(2.)
 el1 = barre2D([0,1],L_barre,E,S,90.*pi/180.)
-el2 = barre2D([0,2],sqrt(2.)*L_barre,E,S,45.*pi/180.)
-el3 = barre2D([1,2],L_barre,E,S,0.*pi/180.)
-el4 = barre2D([1,3],sqrt(2.)*L_barre,E,S,45.*pi/180.)
+el2 = barre2D([0,2],L_barre,E,S,0.*pi/180.)
+el3 = barre2D([0,3],s2*L_barre,E,S,45.*pi/180.)
+el4 = barre2D([1,3],L_barre,E,S,0.*pi/180.)
 el5 = barre2D([2,3],L_barre,E,S,90.*pi/180.)
-el6 = barre2D([2,4],L_barre,E,S,0.*pi/180.)
-el7 = barre2D([3,5],L_barre,E,S,0.*pi/180.)
-el8 = barre2D([4,5],L_barre,E,S,90.*pi/180)
-el9 = barre2D([5,6],sqrt(2.)*L_barre,E,S,-45.*pi/180.)
-el10 = barre2D([4,6],L_barre,E,S,0.*pi/180.)
-el11 = barre2D([4,7],L_barre,E,S,-45.*pi/180.)
-el12 = barre2D([6,7],L_barre,E,S,-90.*pi/180.)
+el6 = barre2D([2,4],s2/2.*L_barre,E,S,45.*pi/180.)
+el7 = barre2D([3,4],s2/2.*L_barre,E,S,-45.*pi/180.)
+el8 = barre2D([4,5],s2/2.*L_barre,E,S,-45.*pi/180.)
+el9 = barre2D([4,6],s2/2.*L_barre,E,S,45.*pi/180.)
+el10 = barre2D([5,6],sqrt(2.)*L_barre,E,S,90*pi/180.)
+el11 = barre2D([3,6],L_barre,E,S,0.*pi/180.)
+el12 = barre2D([2,5],L_barre,E,S,0.*pi/180.)
+el13 = barre2D([6,7],s2*L_barre,E,S,-45.*pi/180.)
+el14 = barre2D([5,7],sqrt(2.)*L_barre,E,S,0.*pi/180.)
+el15 = barre2D([6,8],sqrt(2.)*L_barre,E,S,0.*pi/180.)
+el16 = barre2D([7,8],sqrt(2.)*L_barre,E,S,90.*pi/180.)
 
-els=[el1,el2,el3,el4,el5,el6,el7,el8,el9,el10,el11,el12]
+els=[el1,el2,el3,el4,el5,el6,el7,el8,el9,el10,el11,el12,el13,el14,el15,el16]
 
 plotElements(coords,els)
-axis([-100,3.*L_barre+100,-100.,2.*L_barre+100.])
+axis([-100,3.*L_barre+100,-100.,L_barre+100.])
 print  '--------Definition du probleme global'
 ndofs = getNumberOfDofs(coords)
             
