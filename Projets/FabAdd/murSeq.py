@@ -35,7 +35,7 @@ LZat    = 10.
 LSub    = 30.
 ESub    = 20.
 Passe   = [1,2]# ou [2,3]
-poSects= [-10.,0.,20.,25.,90.,100.]
+poSects= [-10.,0.,60.,65.,90.,100.]
 Sommets=[]
 for sect in poSects: 
   Sommets.append(geompy.MakeVertex(0, sect, 0))              #  Sommet_1 
@@ -133,21 +133,11 @@ for i in range(len(poSects)-1):
   Coques.append(geompy.MakeShell([Faces[1+numFacesSectDeb[i]], Faces[7+numFacesSectDeb[i]],Faces[1+numFacesJoint[i]], Faces[8+numFacesJoint[i]], Faces[9+numFacesJoint[i]],Faces[12+numFacesJoint[i]]]))
   Coques.append(geompy.MakeShell([Faces[2+numFacesSectDeb[i]], Faces[8+numFacesSectDeb[i]],Faces[6+numFacesJoint[i]], Faces[9+numFacesJoint[i]], Faces[10+numFacesJoint[i]],Faces[13+numFacesJoint[i]]]))
   Coques.append(geompy.MakeShell([Faces[3+numFacesSectDeb[i]], Faces[9+numFacesSectDeb[i]],Faces[2+numFacesJoint[i]], Faces[3+numFacesJoint[i]], Faces[11+numFacesJoint[i]],Faces[12+numFacesJoint[i]]]))
-  Coques.append(geompy.MakeShell([Faces[4+numFacesSectDeb[i]], Faces[10+numFacesSectDeb[i]],Faces[4+numFacesJoint[i]], Faces[5+numFacesJoint[i]], Faces[10+numFacesJoint[i]],Faces[11+numFacesJoint[i]]]))
+  Coques.append(geompy.MakeShell([Faces[4+numFacesSectDeb[i]], Faces[10+numFacesSectDeb[i]],Faces[11+numFacesJoint[i]], Faces[10+numFacesJoint[i]],Faces[4+numFacesJoint[i]], Faces[5+numFacesJoint[i]]]))
   if (i in Passe):
     Coques.append(geompy.MakeShell([Faces[5+numFacesSectDeb[i]], Faces[11+numFacesSectDeb[i]], Faces[0+numFacesJoint[i]], Faces[14+numFacesJoint[i]], Faces[15+numFacesJoint[i]], Faces[16+numFacesJoint[i]]]))
-    #Coques.append(geompy.MakeShell([Faces[5+numFacesSectDeb[i]], Faces[11+numFacesSectDeb[i]], Faces[0+numFacesJoint[i]]_51, Faces[14+numFacesJoint[i]]_65, Faces[15+numFacesJoint[i]]_66, Faces[16+numFacesJoint[i]]_67]))
-#Solide_1 = geompy.MakeSolid([Coque_1])
-#Face_25 = geompy.MakeFaceWires([Ligne_10, Ligne_27, Ligne_70, Ligne_74], 1)
-#Face_26 = geompy.MakeFaceWires([Ligne_11, Ligne_28, Ligne_74, Ligne_76], 1)
-#Face_27 = geompy.MakeFaceWires([Ligne_13, Ligne_30, Ligne_75, Ligne_76], 1)
-#Face_28 = geompy.MakeFaceWires([Ligne_12, Ligne_29, Ligne_76, Ligne_78], 1)
-#Face_29 = geompy.MakeFaceWires([Ligne_14, Ligne_31, Ligne_71, Ligne_76], 1)
-#Face_30 = geompy.MakeFaceWires([Ligne_9, Ligne_26, Ligne_73, Ligne_74], 1)
+   # Coques.append(geompy.MakeShell([Faces[5+numFacesSectDeb[i]], Faces[11+numFacesSectDeb[i]], Faces[0+numFacesJoint[i]]_51, Faces[14+numFacesJoint[i]]_65, Faces[15+numFacesJoint[i]]_66, Faces[16+numFacesJoint[i]]_67]))
 
-#Face_67 = geompy.MakeFaceWires([Ligne_32, Ligne_49, Ligne_81, Ligne_91], 1)
-#Face_68 = geompy.MakeFaceWires([Ligne_33, Ligne_50, Ligne_91, Ligne_92], 1)
-#Face_69 = geompy.MakeFaceWires([Ligne_34, Ligne_51, Ligne_82, Ligne_92], 1)
   
 geompy.addToStudy( O, 'O' )
 geompy.addToStudy( OX, 'OX' )
@@ -168,25 +158,80 @@ Eprouv = geompy.MakeCompound(Solides)
 
 Solides = geompy.ExtractShapes(Eprouv, geompy.ShapeType["SOLID"], True)
 
-# 
-#   for i in [
-# 
-#
-#
-# print 'Ar_te_2',listSameIDs
-# geomObj_431 = geompy.GetInPlace(Solide_0, Ar_te_2, True)
+GLS=[]
+GSS=[]
 geompy.addToStudy(Eprouv,'test')
 for i,sol in enumerate(Solides):
   localAretes = geompy.ExtractShapes(sol, geompy.ShapeType["EDGE"], True)
-  lsIDS=[]
-  for ii in [1,2,9,10]:
-     geomObj = geompy.GetInPlace(sol,localAretes[ii], True)
-     listSameIDs = geompy.GetSameIDs(sol, geomObj)
-     lsIDS.append(listSameIDs[0])
-  Groupe = geompy.CreateGroup(sol, geompy.ShapeType["EDGE"])
-  geompy.UnionIDs(Groupe, lsIDS)
+  longIDS=[]
+  sectIDS=[]
+  for arete in localAretes:
+     angleY=geompy.GetAngle(arete,OY)
+     iidd =  geompy.GetSubShapeID(sol,arete)
+     if angleY==0:
+       longIDS.append(iidd)
+     else:
+       sectIDS.append(iidd)
+  GroupeL = geompy.CreateGroup(sol, geompy.ShapeType["EDGE"])
+  GroupeS = geompy.CreateGroup(sol, geompy.ShapeType["EDGE"])
+  geompy.UnionIDs(GroupeL, longIDS)
+  geompy.UnionIDs(GroupeS,sectIDS)
+  GLS.append(GroupeL)
+  GSS.append(GroupeS)
   geompy.addToStudyInFather(Eprouv,sol,'solide_'+str(i))
-  geompy.addToStudyInFather(sol,Groupe,'GroupeLong')
-  
+  geompy.addToStudyInFather(sol,GroupeL,'GroupeLong')
+  geompy.addToStudyInFather(sol,GroupeS,'GroupeSect')
+
+
+
+
+###
+### SMESH component
+###
+
+import  SMESH, SALOMEDS
+from salome.smesh import smeshBuilder
+
+from salome.StdMeshers import StdMeshersBuilder
+
+smesh = smeshBuilder.New(theStudy)
+Maillage_1 = smesh.Mesh(Eprouv)
+Regular_1D = Maillage_1.Segment()
+Local_Length_1 = Regular_1D.LocalLength(0.5,None,1e-07)
+Quadrangle_2D = Maillage_1.Quadrangle(algo=smeshBuilder.QUADRANGLE)
+Quadrangle_Parameters_1 = Quadrangle_2D.QuadrangleParameters(StdMeshersBuilder.QUAD_QUADRANGLE_PREF,-1,[],[])
+Hexa_3D = Maillage_1.Hexahedron(algo=smeshBuilder.Hexa)
+SSML=[]
+SSMS=[]
+for gl in GLS:
+  Regular_1D_1 = Maillage_1.Segment(geom=gl)
+  Nb_Segments_1 = Regular_1D_1.NumberOfSegments(20)
+  SSML.append( Regular_1D_1.GetSubMesh())
+for gs in GSS:
+  Regular_1D_2 = Maillage_1.Segment(geom=gs)
+  Nb_Segments_2 = Regular_1D_2.NumberOfSegments(8)
+  SSMS.append(Regular_1D_2.GetSubMesh())
+isDone = Maillage_1.Compute()
+coincident_nodes_on_part = Maillage_1.FindCoincidentNodesOnPart( Maillage_1, 1e-05, [], 0 )
+Maillage_1.MergeNodes(coincident_nodes_on_part)
+Maillage_1.ExportMED( r'/home/bordreuil/Enseignement/Polytech/Projets/2018/Ther3DFabAdd/Part.med', 0, SMESH.MED_V2_2, 1, None ,1)
+
+
+#Sous_maillage_1 = Regular_1D_1.GetSubMesh()
+#Sous_maillage_2 = Regular_1D_2.GetSubMesh()
+
+
+## Set names of Mesh objects
+smesh.SetName(Regular_1D.GetAlgorithm(), 'Regular_1D')
+smesh.SetName(Hexa_3D.GetAlgorithm(), 'Hexa_3D')
+smesh.SetName(Quadrangle_2D.GetAlgorithm(), 'Quadrangle_2D')
+smesh.SetName(Local_Length_1, 'Local Length_1')
+smesh.SetName(Nb_Segments_1, 'Nb. Segments_1')
+smesh.SetName(Quadrangle_Parameters_1, 'Quadrangle Parameters_1')
+smesh.SetName(Nb_Segments_2, 'Nb. Segments_2')
+smesh.SetName(Maillage_1.GetMesh(), 'Part')
+
+#smesh.SetName(Sous_maillage_2, 'Sous-maillage_2')
+#smesh.SetName(Sous_maillage_1, 'Sous-maillage_1')
 if salome.sg.hasDesktop():
   salome.sg.updateObjBrowser(1)
