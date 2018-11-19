@@ -1,6 +1,6 @@
 from numpy import *
 
-GP1 = array([1./3.,1./3.],'d')
+GP1 = array([[1./3.,1./3.]],'d')
 WP1 = array([1],'d') 
 
 GP2 = array([[4.,1.],
