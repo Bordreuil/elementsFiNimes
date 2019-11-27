@@ -44,7 +44,10 @@ class resultsFile:
         polydata.Modified()
         writer = vtk.vtkXMLPolyDataWriter()
         writer.SetFileName(self._fname)
-        writer.SetInput(polydata)
+        if vtk.VTK_MAJOR_VERSION <= 5:
+            writer.SetInput(polydata)
+        else:
+            writer.SetInputData(polydata)
         writer.Write()
         
 def plotElements(coords,els):
