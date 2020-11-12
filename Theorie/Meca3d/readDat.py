@@ -3,13 +3,13 @@ import string
 
 def readDat(fname,indX=1,indY=2):
     lignes    = open(fname,'r').readlines()
-    res       = string.split(lignes[0])
+    res       = lignes[0].split()
     numPoints = int(res[0])
     numElts   = int(res[1])
-    print 'nombre de noeuds:',numPoints
+    #print 'nombre de noeuds:',numPoints
     nodes    = Nodes()
     for i in range(numPoints):
-        res   = string.split(lignes[i+1])
+        res   = lignes[i+1].split()
         numpt = int(res[0])-1
         x     = float(res[1])
         y     = float(res[2])
@@ -17,9 +17,9 @@ def readDat(fname,indX=1,indY=2):
         nodes.addNode(numpt,Node(numpt,x,y,z))
 
     hexs = list()
-    print 'Nombre d elements:',numElts
+    #print 'Nombre d elements:',numElts
     for i in range(numElts):
-         res = string.split(lignes[numPoints+1+i])
+         res = lignes[numPoints+1+i].split()
          if int(res[1]) == 308:
              p1 = int(res[2])-1
              p2 = int(res[3])-1
@@ -43,7 +43,7 @@ def readDat(fname,indX=1,indY=2):
 if __name__=='__main__':
         from pylab import *
         nodes,els=readDat('datas/Maillage_2.dat')
-        print len(nodes),len(els)
+        print(len(nodes),len(els))
         # for el in els:
         #     coord = el.coordNodes()
         #     plot(coord[:,0],coord[:,1],'b')
