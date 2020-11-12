@@ -60,4 +60,4 @@ def printMatrix(K):
         for j in range(K.shape[1]):
             ligne+='\t'+str(K[i,j])+','
         ligne+=']'
-        print ligne
+        print(ligne)

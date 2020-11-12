@@ -101,7 +101,7 @@ class TriangleMeca2d:
         
         return dN
     def computeStressesInElement(self,du):
-        B = self.matrixB(0.,0.)
+        B = self.matrixB(0.,0.);B1=self.matrixB(0.33,0.33)
         E = self.matrixE()
         sigmas = dot(E,dot(B,du))
         return sigmas

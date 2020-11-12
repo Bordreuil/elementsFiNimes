@@ -6,7 +6,7 @@ def readGmsh(fname,indX=1,indY=2):
     numPoints = int(lignes[4])
     nodes    = Nodes()
     for i in range(numPoints):
-        res   = string.split(lignes[i+5])
+        res   = lignes[i+5].split()
         numpt = int(res[0])-1
         x     = float(res[indX])
         y     = float(res[indY])
@@ -14,7 +14,7 @@ def readGmsh(fname,indX=1,indY=2):
     numElts   = int(lignes[numPoints+7])
     triangles = list()
     for i in range(numElts):
-        res = string.split(lignes[numPoints+8+i])
+        res = lignes[numPoints+8+i].split()
         if int(res[1]) == 2:
             p1 = int(res[-3])-1
             p2 = int(res[-2])-1
