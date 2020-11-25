@@ -16,9 +16,9 @@ nodesHautCentre = [ 52,53,54,55,56,57,58,59,60]
 nodesHautCote = [2,3]
 
 nodesHaut = nodesHautCentre+nodesHautCote
-encastre=[]
+encastre=[0]
 for i in nodesBas:
-    encastre.append(dofNumberGlobal(i,0))
+    #encastre.append(dofNumberGlobal(i,0))
     encastre.append(dofNumberGlobal(i,1))
 
 effortsCentre=[]
@@ -28,15 +28,15 @@ effortsCote=[]
 for i in nodesHautCote:
     effortsCote.append(dofNumberGlobal(i,1))
 values =zeros((len(encastre),),'d')
-print '....Nbre de noeuds\t:',len(nodes)
-print '....Nbre de ddls\t:',ndofs
+print('....Nbre de noeuds\t:',len(nodes))
+print('....Nbre de ddls\t:',ndofs)
 
 Kglob=zeros((ndofs,ndofs),'d')
 Fglob=zeros((ndofs,),'d')
 Fglob[effortsCentre]=1000.
 Fglob[effortsCote]=500.
-print '....Effort total\t:',len(effortsCentre)*1000.+len(effortsCote)*500.
-print '....Contrainte yy\t:',(len(effortsCentre)*1000.+len(effortsCote)*500.)/100.
+print('....Effort total\t:',len(effortsCentre)*1000.+len(effortsCote)*500.)
+print('....Contrainte yy\t:',(len(effortsCentre)*1000.+len(effortsCote)*500.)/100.)
 for el in els:
     el.setMaterialProperties(E,nu)
     el.setGaussPointsAndWeights(GP2,WP2)
@@ -55,8 +55,8 @@ sigmas  = []
 for el in els:
     ddls = el.ddls()
     sigmas.append(el.computeStressesInElement(du[ddls]))
-fichResults="plaque.vtp"
-print '....Nom du fichier des resultats:',fichResults
+fichResults="plaqueHom.vtp"
+print('....Nom du fichier des resultats:',fichResults)
 resFile = resultsFile(fichResults)
 resFile.defineMesh(nodes,els)
 resFile.addVectorToNode(Du,'DEPL')

@@ -24,14 +24,14 @@ for i in nodesHaut:
     efforts.append(dofNumberGlobal(i,1))
 
 values =zeros((len(encastre),),'d')
-print '....Nbre de noeuds\t:',len(nodes)
-print '....Nbre de ddls\t:',ndofs
+print('....Nbre de noeuds\t:',len(nodes))
+print('....Nbre de ddls\t:',ndofs)
 
 Kglob=zeros((ndofs,ndofs),'d')
 Fglob=zeros((ndofs,),'d')
 Fglob[efforts]=1000.
-print '....Effort total\t:',len(efforts)*1000.
-print '....Contrainte yy\t:',(len(efforts)*1000.)/100.
+print('....Effort total\t:',len(efforts)*1000.)
+print('....Contrainte yy\t:',(len(efforts)*1000.)/100.)
 for el in els:
     el.setMaterialProperties(E,nu)
     el.setGaussPointsAndWeights(GP2,WP2)
@@ -51,10 +51,11 @@ for el in els:
     ddls = el.ddls()
     sigmas.append(el.computeStressesInElement(du[ddls]))
 fichResults="plaque.vtp"
-print '....Nom du fichier des resultats:',fichResults
+print('....Nom du fichier des resultats:',fichResults)
 resFile = resultsFile(fichResults)
 resFile.defineMesh(nodes,els)
 resFile.addVectorToNode(Du,'DEPL')
 resFile.addVectorToCell(sigmas,'SIGM_ELNO')
 resFile.write()
+
 
