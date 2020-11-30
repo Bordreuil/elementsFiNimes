@@ -1,6 +1,5 @@
 
 // Bibliotheque a telecharger
-#include <Tone.h>
 #include "HX711.h"
 
 // HX711.DOUT  - pin #A1
