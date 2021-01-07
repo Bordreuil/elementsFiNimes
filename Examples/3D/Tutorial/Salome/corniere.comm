@@ -1,0 +1,46 @@
+DEBUT(LANG='FR')
+
+MAIL = LIRE_MAILLAGE(FORMAT='MED',
+                     UNITE=20)
+
+MAIL = MODI_MAILLAGE(reuse=MAIL,
+                     MAILLAGE=MAIL,
+                     ORIE_PEAU_3D=_F(GROUP_MA=('Force', 'Encastre')))
+
+MODE = AFFE_MODELE(AFFE=_F(MODELISATION='3D',
+                           PHENOMENE='MECANIQUE',
+                           TOUT='OUI'),
+                   MAILLAGE=MAIL)
+
+# DEBUT();
+MA = DEFI_MATERIAU(ELAS=_F(E=210000.0,
+                           NU=0.3))
+
+MATE = AFFE_MATERIAU(AFFE=_F(MATER=MA,
+                             TOUT='OUI'),
+                     MAILLAGE=MAIL)
+
+CHAR = AFFE_CHAR_MECA(DDL_IMPO=_F(DX=0.0,
+                                  DY=0.0,
+                                  DZ=0.0,
+                                  GROUP_NO='Encastre'),
+                      FORCE_FACE=_F(FX=23.0,
+                                    FY=-8.0,
+                                    GROUP_MA=('Force', )),
+                      MODELE=MODE)
+
+RESU = MECA_STATIQUE(CHAM_MATER=MATE,
+                     EXCIT=_F(CHARGE=CHAR),
+                     MODELE=MODE)
+
+RESU = CALC_CHAMP(reuse=RESU,
+                  CONTRAINTE=('SIGM_ELNO', 'SIGM_NOEU'),
+                  RESULTAT=RESU)
+
+IMPR_RESU(FORMAT='MED',
+          RESU=_F(MAILLAGE=MAIL,
+                  NOM_CHAM=('DEPL', 'SIGM_NOEU'),
+                  RESULTAT=RESU),
+          UNITE=80)
+
+FIN()
