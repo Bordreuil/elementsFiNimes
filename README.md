@@ -11,6 +11,7 @@ Le projet contient un dossier:
     * Plaques
     * Poutres
     * 2D
+    * 3D
     * Soudage
 * Tools  : contient des routines facilitant la modélisation géométrique de certains assemblages.
 * Projets
