@@ -19,15 +19,30 @@ DEBUT(PAR_LOT='NON',);
 MA=LIRE_MAILLAGE(UNITE=20,
                  FORMAT='MED',);
 
+LTH1=LIRE_RESU(FORMAT='MED',
+		MAILLAGE=MA,
+		UNITE=81,
+		PRECISION=1E-10,
+#		INFO=2,
+		INST=200.,
+		TYPE_RESU='EVOL_THER',
+		FORMAT_MED=(_F(NOM_CHAM='TEMP',
+			       NOM_CHAM_MED='TEMPDIFFTEMP',),),);
+
+MOD0=AFFE_MODELE(MAILLAGE=MA,
+                   AFFE=_F(TOUT='OUI',
+                           PHENOMENE='THERMIQUE',
+                           MODELISATION='AXIS',),);
+
 
 # Definition de la fonction pour application de la temperature 
 # dans une passe
 
 MULT=DEFI_FONCTION(
                    NOM_PARA='INST',
-                   VALE=(0.0 ,0.0 ,
-                         0.25 ,1.0 ,
-                         2.0 ,1.0 ,),);
+                   VALE=(200.0 ,0.0 ,
+                         200.25 ,1.0 ,
+                         202.0 ,1.0 ,),);
 
 # Definition du materiau (INOX 304L)
 # Les unites ont ete basculees pour que l unite de longueur soit le mm
@@ -40,12 +55,12 @@ AIR=DEFI_MATERIAU(THER=_F(LAMBDA=2.62e-05,
 
 # Definition des instants de calcul pour une analyse de thermique
 
-T_CHAUFF=DEFI_LIST_REEL(DEBUT=0.0,
-                        INTERVALLE=_F(JUSQU_A=2.0,
+T_CHAUFF=DEFI_LIST_REEL(DEBUT=200.0,
+                        INTERVALLE=_F(JUSQU_A=202.0,
                                       NOMBRE=20,),);
 
-T_DIFF=DEFI_LIST_REEL(DEBUT=2.0,
-                      INTERVALLE=_F(JUSQU_A=100.0,
+T_DIFF=DEFI_LIST_REEL(DEBUT=202.0,
+                      INTERVALLE=_F(JUSQU_A=300.0,
                                     NOMBRE=200,),);
 
 # Affectation du modele de thermique
@@ -54,13 +69,24 @@ MODELE=AFFE_MODELE(MAILLAGE=MA,
                    AFFE=_F(TOUT='OUI',
                            PHENOMENE='THERMIQUE',
                            MODELISATION='AXIS',),);
+#Projection du champ thermique n-1 à l'instant final sur le modèle thermique n
 
+PTH1=PROJ_CHAMP(RESULTAT=LTH1,
+                 MODELE_1=MOD0,
+                 MODELE_2=MODELE,
+                 VIS_A_VIS=_F(TOUT_1='OUI',
+                              TOUT_2='OUI',),);
+EXT1=CREA_CHAMP(TYPE_CHAM='NOEU_TEMP_R',
+		 OPERATION='EXTR',
+		 RESULTAT=PTH1,
+		 NOM_CHAM='TEMP',
+		 INST=200.,);			      
 # Affectation du materiau a notre plaque
 
 MAT=AFFE_MATERIAU(MAILLAGE=MA,
-                  AFFE=(_F(GROUP_MA=('bsTuy','htTuy','Envers','Passe1',),
+                  AFFE=(_F(GROUP_MA=('bsTuy','htTuy','Envers','Passe1','Passe2','Passe3'),
                            MATER=INOX,),
-                        _F(GROUP_MA=('Passe2','Passe3','Passe4'),
+                        _F(GROUP_MA=('Passe4'),
                            MATER=AIR,),),);
 
 # Definition d une temperature initiale de la passe en cours
@@ -71,7 +97,7 @@ CONV=AFFE_CHAR_THER(MODELE=MODELE,
                                TEMP_EXT=20.0,),);
 
 TEMPIMPO=AFFE_CHAR_THER(MODELE=MODELE,
-                        TEMP_IMPO=_F(GROUP_MA=('Passe1','Envers',),
+                        TEMP_IMPO=_F(GROUP_MA=('Passe3',),
                                      TEMP=1700.0,),);
 
 # Calcul thermique transitoire pour le maintien 
@@ -82,7 +108,7 @@ TEMPCHA=THER_LINEAIRE(MODELE=MODELE,
                       EXCIT=(_F(CHARGE=TEMPIMPO,
                                 FONC_MULT=MULT,),
                              _F(CHARGE=CONV,),),
-                      ETAT_INIT=_F(VALE=20.0,),
+                      ETAT_INIT=_F(CHAM_NO=EXT1,),
                       INCREMENT=_F(LIST_INST=T_CHAUFF,),
                       SOLVEUR=_F(METHODE='MULT_FRONT',
                                  RENUM='METIS',
@@ -106,10 +132,11 @@ TEMPDIFF=THER_LINEAIRE(MODELE=MODELE,
 # dans les groupes inox
 
 IMPR_RESU(FORMAT='MED',
+	  UNITE = 80,
           RESU=_F(MAILLAGE=MA,
                   RESULTAT=TEMPDIFF,
                   NOM_CHAM='TEMP',
-                  GROUP_MA=('bsTuy','htTuy','Envers','Passe1',),),);
+                  GROUP_MA=('bsTuy','htTuy','Envers','Passe1','Passe2','Passe3'),),);
 
 FIN();
 #CHECKSUM:48457579db931938ca7ef3b4704de393  -:FIN CHECKSUM
