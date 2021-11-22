@@ -73,10 +73,10 @@ aussien1 = FORMULE(VALE='gaussien(X,Y,INST,22.5)',
 # q = coef_h ( T_piece - Temp_ext )
 # ici coef_h = 20e-6 est fort car on considere l echange sur les 
 #                        deux cotes de la plaque 
-ECH=AFFE_CHAR_THER(MODELE=MODELE,
-                   ECHANGE=_F(TOUT='OUI',
-                              COEF_H   = 20.0e-6,
-                              TEMP_EXT = 20.0,),);
+# ECH=AFFE_CHAR_THER(MODELE=MODELE,
+#                    ECHANGE=_F(TOUT='OUI',
+#                               COEF_H   = 20.0e-6,
+#                               TEMP_EXT = 20.0,),);
 
 # Utilisation de la formule dans un chargement de thermique
 
@@ -91,11 +91,10 @@ FLUTHER=AFFE_CHAR_THER_F(MODELE=MODELE,
 
 # Calcul thermique transitoire
 # Les resultats sont dans l objet TEMP
-
+                   #       _F(CHARGE=ECH,),),
 TEMP=THER_LINEAIRE(MODELE=MODELE,
                    CHAM_MATER=MAT,
-                   EXCIT=(_F(CHARGE=FLUTHER,),
-                          _F(CHARGE=ECH,),),
+                   EXCIT=(_F(CHARGE=FLUTHER,),),
                    INCREMENT=_F(LIST_INST=L_INST,),
                    ETAT_INIT=_F(VALE=20.E0,),
                    SOLVEUR=_F(METHODE='MULT_FRONT',
@@ -105,7 +104,7 @@ TEMP=THER_LINEAIRE(MODELE=MODELE,
 
 # Impression des resultats: pour ce cas, uniquement la temperature est sortie
 # dans le fichier rmed
-IMPR_RESU(MODELE=MODELE,
+IMPR_RESU(#MODELE=MODELE,
           FORMAT='MED',
           RESU=_F(RESULTAT=TEMP,
                   NOM_CHAM='TEMP',),);
