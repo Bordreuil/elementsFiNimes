@@ -1,0 +1,59 @@
+DEBUT(LANG='FR')
+
+
+mesh = LIRE_MAILLAGE(identifier=u'0:1',
+                     UNITE=20)
+
+model = AFFE_MODELE(identifier=u'1:1',
+                    AFFE=_F(MODELISATION=('3D', ),
+                            PHENOMENE='MECANIQUE',
+                            TOUT='OUI'),
+                    MAILLAGE=mesh)
+
+mater = DEFI_MATERIAU(identifier=u'2:1',
+                      ELAS=_F(E=196200.0,
+                              NU=0.3))
+
+fieldmat = AFFE_MATERIAU(identifier=u'3:1',
+                         AFFE=_F(MATER=(mater, ),
+                                 TOUT='OUI'),
+                         MAILLAGE=mesh)
+
+load0 = AFFE_CHAR_MECA(identifier=u'4:1',
+                       DDL_IMPO=_F(DX=0.0,
+                                   DY=0.0,
+                                   DZ=0.0,
+                                   GROUP_NO=('Encastre', )),
+                       MODELE=model)
+
+load1 = AFFE_CHAR_MECA(identifier=u'5:1',
+                       FORCE_FACE=(_F(FY=5440.0,
+                                      FZ=-13942.0,
+                                      GROUP_MA=('Gauche', )),
+                                   _F(FY=5440.0,
+                                      FZ=13942.0,
+                                      GROUP_MA=('Droite', )),
+                                   _F(FY=695.6,
+                                      FZ=1144.0,
+                                      GROUP_MA=('Haut', ))),
+                       MODELE=model)
+
+reslin = MECA_STATIQUE(identifier=u'6:1',
+                       CHAM_MATER=fieldmat,
+                       EXCIT=(_F(CHARGE=load0),
+                              _F(CHARGE=load1)),
+                       MODELE=model)
+
+reslin = CALC_CHAMP(identifier=u'7:1',
+		     reuse= reslin,
+                     CONTRAINTE=('SIGM_NOEU', ),
+                     RESULTAT=reslin)
+
+
+IMPR_RESU(identifier=u'8:1',
+          UNITE=80,
+	  RESU=_F(MAILLAGE=mesh,
+                  RESULTAT=reslin,
+                  NOM_CHAM=('SIGM_NOEU','SIEQ_NOEU','DEPL',),))
+
+FIN()
