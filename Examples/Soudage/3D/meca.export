@@ -1,0 +1,43 @@
+P actions make_etude
+P aster_root /opt/aster
+P consbtc oui
+P corefilesize unlimited
+P cpresok RESNOOK
+P debug nodebug
+P display bordreuil:0
+P facmtps 1
+P follow_output yes
+P lang en
+P mclient bordreuil
+P memjob 1048576
+P memory_limit 1024.0
+P mode interactif
+P mpi_nbcpu 1
+P mpi_nbnoeud 1
+P nbmaxnook 5
+P ncpus 4
+P noeud localhost
+P nomjob meca
+P origine ASTK 2019.0.final
+P platform LINUX64
+P profastk bordreuil@bordreuil:/home/bordreuil/homedebian/home/bordreuil/Enseignement/elementsFiNimes/Examples/Soudage/3D/meca.astk
+P protocol_copyfrom asrun.plugins.server.SCPServer
+P protocol_copyto asrun.plugins.server.SCPServer
+P protocol_exec asrun.plugins.server.SSHServer
+P proxy_dir /tmp
+P rep_trav /tmp/bordreuil-bordreuil-interactif_26702
+P serveur bordreuil
+P soumbtc oui
+P time_limit 36000.0
+P tpsjob 601
+P uclient bordreuil
+P username bordreuil
+P version 13.6
+A args 
+A memjeveux 128.0
+A tpmax 36000.0
+F comm /home/bordreuil/homedebian/home/bordreuil/Enseignement/elementsFiNimes/Examples/Soudage/3D/contresi.comm D  1
+F libr /home/bordreuil/homedebian/home/bordreuil/Enseignement/elementsFiNimes/Examples/Soudage/3D/soud.rmed D  81
+F mmed /home/bordreuil/homedebian/home/bordreuil/Enseignement/elementsFiNimes/Examples/Soudage/3D/plaquemed33.med D  20
+F mess /home/bordreuil/homedebian/home/bordreuil/Enseignement/elementsFiNimes/Examples/Soudage/3D/mess.mess R  6
+F rmed /home/bordreuil/homedebian/home/bordreuil/Enseignement/elementsFiNimes/Examples/Soudage/3D/contrainte.rmed R  80
