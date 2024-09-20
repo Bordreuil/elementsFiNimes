@@ -15,4 +15,7 @@ Le projet contient un dossier:
     * Soudage
 * Tools  : contient des routines facilitant la modélisation géométrique de certains assemblages.
 * Projets
+* Theorie : contient des scipts python associe à:
+        - Théorie des plaques et des coques
+        - Méthode des éléments finis
 
