@@ -20,11 +20,11 @@ class T10Thermal3d(elementBaseThermal):
         self._n9 = n10
     def nbDdls(self):
         return 10
-  
+
     def connectivite(self):
         return [self._n1.id(),self._n2.id(),self._n3.id(),self._n4.id(),
                 self._n5.id(),self._n6.id(),self._n7.id(),self._n8.id(),
-                self._n9.id(),self._n10.id()]    
+                self._n9.id(),self._n10.id()]
     def coordNodes(self):
         coord      = zeros((10,3),'d')
         coord[0,:] = [self._n1.x(),self._n1.y(),self._n1.z()]
@@ -37,7 +37,7 @@ class T10Thermal3d(elementBaseThermal):
         coord[7,:] = [self._n8.x(),self._n8.y(),self._n8.z()]
         coord[8,:] = [self._n9.x(),self._n9.y(),self._n9.z()]
         coord[9,:] = [self._n10.x(),self._n10.y(),self._n10.z()]
-  
+
         return coord
 
     def N(self,xi,eta,zeta):
@@ -57,15 +57,35 @@ class T10Thermal3d(elementBaseThermal):
     # FINIR le Dn
     def Dn(self,xi,eta,zeta):
         dN = zeros((3,10),'d')
-        dN[0,0] = -1. ;dN[0,1] = 1.;dN[0,2] = 0 ;dN[0,3] = 0;dN[0,4] =
-        dN[0,5] = -1. ;dN[0,6] = 1.;dN[0,7] = 0 ;dN[0,8] = 0;dN[0,9] =
-        dN[1,0] = -1. ;dN[1,1] = 1.;dN[1,2] = 0 ;dN[1,3] = 0;dN[1,4] =
-        dN[1,5] = -1. ;dN[1,6] = 1.;dN[1,7] = 0 ;dN[1,8] = 0;dN[1,9] =
-        dN[2,0] = -1. ;dN[2,1] = 1.;dN[2,2] = 0 ;dN[2,3] = 0;dN[2,4] =
-        dN[2,5] = -1. ;dN[2,6] = 1.;dN[2,7] = 0 ;dN[2,8] = 0;dN[2,9] =
+        dN[0,0] = 4.0*eta + 4.0*xi + 4.0*zeta - 3.0. ;
+        dN[0,1] = 1.;
+        dN[0,2] = 0 ;
+        dN[0,3] = 0;
+        dN[0,4] =  ;
+        dN[0,5] = -1. ;
+        dN[0,6] = 1.;
+        dN[0,7] = 0 ;
+        dN[0,8] = 0;
+        dN[0,9] =
+        dN[1,0] = 4.0*eta + 4.0*xi + 4.0*zeta - 3.0. ;
+        dN[1,1] = 1.;
+        dN[1,2] = 0 ;
+        dN[1,3] = 0;
+        dN[1,4] =
+        dN[1,5] = -1. ;
+        dN[1,6] = 1.;
+        dN[1,7] = 0 ;
+        dN[1,8] = 0;
+        dN[1,9] =
+        dN[2,0] =  4.0*eta + 4.0*xi + 4.0*zeta - 3.0. ;
+        dN[2,1] = 1.;
+        dN[2,2] = 0 ;
+        dN[2,3] = 0;
+        dN[2,4] =
+        dN[2,5] = -1. ;
+        dN[2,6] = 1.;
+        dN[2,7] = 0 ;
+        dN[2,8] = 0;
+        dN[2,9] =
 
         return dN
-
-
-
- 

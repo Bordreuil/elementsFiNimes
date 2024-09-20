@@ -1,24 +1,7 @@
 from numpy import *
 from matrixTools import *
+from nodes import *
 
-class Node:
-    def __init__(self,num,x,y,z):
-        self._id = num
-        self._x = x
-        self._y = y
-        self._z = z
-    def x(self):
-        return self._x
-    def y(self):
-        return self._y
-    def z(self):
-        return self._z
-    def id(self):
-        return self._id
-
-class Nodes(dict):
-    def addNode(self,num,node):
-        self[num] = node
 
 class elementBaseThermal:
       def jacobian(self,xi,eta,zeta):
@@ -59,14 +42,19 @@ class elementBaseThermal:
         pts     = self.gausspoints()
         weights = self.weights()
         KT      = zeros((self.nbDdls(),self.nbDdls()),'d')
-
         for i in range(pts.shape[0]):
             B = self.matrixB(pts[i,0],pts[i,1],pts[i,2])
             C = self.matrixC()
             J = self.J(pts[i,0],pts[i,1],pts[i,2])
-            KT += dot(transpose(B),dot(C,B))*J/6*weights[i]
-
+            KT += dot(transpose(B),dot(C,B))*J/6*weights[i]      # Attention au J/6
         return KT
-
-    def computeSource(self,sourceFunction):
-        return None
+    def computeSource(self,sourceFunction,tps):
+        pts     = self.gausspoints()
+        weights = self.weights()
+        VecSource      = zeros((self.nbDdls(),),'d')
+        for i in range(pts.shape[0]):
+            Nshape         = self.N(pts[i,0],pts[i,1],pts[i,2])
+            coordSpaGauss  = dot(Nshape,self.coordsNodes())
+            sour           = sourceFunction(coordSpaGauss[0],coordSpaGauss[1],coordSpaGauss[2],tps)
+            VecSource += dot(Nshape,sour)*weights[i]*J/6
+        return VecSource
