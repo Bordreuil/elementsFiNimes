@@ -39,32 +39,38 @@ Pip= U-Wext
 Mini = diff(Pip,c)
 # print M
 csol = solve(Mini,c)
-print(csol,p0/64./D)
-from pylab import *
+print('Solution minimum:',csol,' Solution exacte:',p0/64./D)
+import numpy as np
 
 #[X,Y] = meshgrid(arange(0,a,2),arange(0,b,2))
-r = linspace(0,a, 50)
-p = linspace(0, 2*np.pi, 50)
-r_mat,th_mat=meshgrid(r,p)
-W      = array(csol*(a**2-r_mat**2)**2,dtype='d')
+r = np.linspace(0,a, 50)
+p = np.linspace(0, 2*np.pi, 50)
+r_mat,th_mat=np.meshgrid(r,p)
+W      = np.array(csol*(a**2-r_mat**2)**2,dtype='d')
 print(csol,a)
-DWDR   = array(-4.*csol[0]*r_mat*(a**2-r_mat**2),dtype='d')
-D2WDR2 = array(-4.*csol[0]*(a**2-3.*r_mat**2),dtype='d')
+DWDR   = np.array(-4.*csol[0]*r_mat*(a**2-r_mat**2),dtype='d')
+D2WDR2 = np.array(-4.*csol[0]*(a**2-3.*r_mat**2),dtype='d')
+
 MR     = -D*(D2WDR2+nu*DWDR/r_mat)
 SR     = MR/h**3*12*h/2.
-X = r_mat*cos(th_mat)
-Y = r_mat*sin(th_mat)
-figure('Deplacement')
-contourf(X,Y,W)
-colorbar()
+X = r_mat*np.cos(th_mat)
+Y = r_mat*np.sin(th_mat)
+import matplotlib.pyplot as plt
+from matplotlib import cm
+plt.figure('Deplacement')
+plt.contourf(X,Y,W)
+plt.colorbar()
 # print X.dtype, Y.dtype,W.dtype
-from mpl_toolkits.mplot3d import Axes3D
-fig =figure('Deplacement 3D')
+#from mpl_toolkits.mplot3d import Axes3D
+#fig =figure('Deplacement 3D')
 # #ax = fig.gca(projection='3d')
-ax=Axes3D(fig)
+#ax=Axes3D(fig)
+import matplotlib
+print('Matplotlib version:',matplotlib.__version__)
+fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 surf = ax.plot_surface(X, Y, W , rstride=1, cstride=1, cmap=cm.coolwarm,
          linewidth=0, antialiased=False)
-figure('Contraintes')
-contourf(X,Y,SR)
-colorbar()
-show()
+plt.figure('Contraintes')
+plt.contourf(X,Y,SR)
+plt.colorbar()
+plt.show()
