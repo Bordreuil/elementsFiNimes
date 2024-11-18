@@ -30,11 +30,11 @@ encastre.append(dofNumberGlobal(3,0))
 efforts=[]
 for i in nodesHaut:
     efforts.append(dofNumberGlobal(i,0))
-print encastre
-print efforts
+print(encastre)
+print(efforts)
 values = zeros((len(encastre),),'d')
-print '....Nbre de noeuds\t:',len(nodes)
-print '....Nbre de ddls\t:',ndofs
+print('....Nbre de noeuds\t:',len(nodes))
+print('....Nbre de ddls\t:',ndofs)
 
 Kglob=zeros((ndofs,ndofs),'d')
 Fglob=zeros((ndofs,),'d')
@@ -55,7 +55,7 @@ Du = zeros((nnodes,3),'d')
 Du[:,0] = du[::3]
 Du[:,1] = du[1::3]
 Du[:,2] = du[2::3]
-print Du
+print('Deplacements:',Du)
 # sigmas  = []
 # for el in els:
 #     ddls = el.ddls()
