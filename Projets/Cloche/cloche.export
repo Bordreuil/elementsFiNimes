@@ -1,0 +1,10 @@
+P time_limit 140
+P memory_limit 512
+P ncpus 1
+P mpi_nbcpu 1
+P mpi_nbnoeud 1
+P testlist verification sequential
+
+F comm calcModes.comm D 1
+F mmed cloche.med D 20
+F rmed Modes.rmed R 80

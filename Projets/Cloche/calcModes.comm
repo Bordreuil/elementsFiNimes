@@ -1,0 +1,76 @@
+# coding=utf-8
+# --------------------------------------------------------------------
+# Copyright (C) 1991 - 2017 - EDF R&D - www.code-aster.org
+# This file is part of code_aster.
+#
+# code_aster is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# code_aster is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with code_aster.  If not, see <http://www.gnu.org/licenses/>.
+# --------------------------------------------------------------------
+
+#
+#        TUYAUTERIE COMPORTANT UN COUDE
+#     MODELISATION PAR DES ELEMENTS HEXAEDRES
+#     ---------------------------------------
+
+DEBUT(CODE=_F(NIV_PUB_WEB='INTERNET'),DEBUG=_F(SDVERI='OUI'))
+
+MAIL=LIRE_MAILLAGE(FORMAT='MED',);
+
+MODELE=AFFE_MODELE(MAILLAGE=MAIL,
+                   AFFE=_F(TOUT='OUI',
+                           PHENOMENE='MECANIQUE',
+                           MODELISATION='3D',),);
+
+MAT=DEFI_MATERIAU(ELAS=_F(E=204000.0,
+                          NU=0.3,
+                          RHO=7.8e-6,),);
+
+CHMAT=AFFE_MATERIAU(MAILLAGE=MAIL,
+                    AFFE=_F(TOUT='OUI',
+                            MATER=MAT,),);
+
+BLOCAGE=AFFE_CHAR_MECA(MODELE=MODELE,
+                       DDL_IMPO=_F(GROUP_MA='Enc',
+                                   DX=0.0,
+                                   DY=0.0,
+                                   DZ=0.0,),);
+
+ASSEMBLAGE(MODELE=MODELE,
+                CHAM_MATER=CHMAT,
+                CHARGE=BLOCAGE,
+                NUME_DDL=CO('NUMEDDL'),
+                MATR_ASSE=(_F(MATRICE=CO('RIGIDITE'),
+                              OPTION='RIGI_MECA',),
+                           _F(MATRICE=CO('MASSE'),
+                              OPTION='MASS_MECA',),),);
+
+MODES=CALC_MODES(MATR_RIGI=RIGIDITE,
+                 OPTION='PLUS_PETITE',
+                 CALC_FREQ=_F(NMAX_FREQ=10,
+                              ),
+                 MATR_MASS=MASSE,
+                 )
+
+IMPR_RESU(FORMAT='MED',
+          RESU=_F(MAILLAGE=MAIL,
+                  RESULTAT=MODES,
+                  NOM_CHAM='DEPL',),);
+
+TEST_RESU(RESU=_F(NUME_ORDRE=1,
+                  PARA='FREQ',
+                  RESULTAT=MODES,
+                  VALE_CALC=8.92046162697,
+                  ),
+          )
+
+FIN();
