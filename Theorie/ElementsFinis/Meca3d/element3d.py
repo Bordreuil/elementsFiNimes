@@ -147,13 +147,15 @@ class H8Meca3d:
         dN[2,7] = 1./8.*(1.-r)*(1.+s);
         return dN
     def computeStressesInElement(self,du):
-        B = self.matrixB(0.,0.);B1=self.matrixB(0.33,0.33)
-        E = self.matrixE()
-        sigmas = dot(E,dot(B,du))
-        return sigmas
+        
+        sigmas = self._computeStressesAtGaussPoints(du)
+        sigma  = 0
+        for i in range(len(self.weights())):
+            sigma+=sigmas[i]*self.weights()[i]
+        return sigma/8
     def _computeStressesAtGaussPoints(self,du):
         pts = self.gausspoints()
-        stressesAtGP=zeros((pts.shape[0],3),'d')
+        stressesAtGP=zeros((pts.shape[0],6),'d')
         E = self.matrixE()
         for i in range(pts.shape[0]):
             B = self.matrixB(pts[i,0],pts[i,1],pts[i,2])

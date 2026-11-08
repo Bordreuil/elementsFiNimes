@@ -27,12 +27,12 @@ class resultsFile:
         self._hexs.GetPointData().AddArray(datas)
     def addVectorToCell(self,fieldValues,name):
         datas = vtk.vtkDoubleArray()
-        datas.SetNumberOfComponents(3)
+        datas.SetNumberOfComponents(6)
         datas.SetName(name)
         for value in fieldValues:
-            datas.InsertNextTuple3(value[0],value[1],value[2])
+            datas.InsertNextTuple6(value[0],value[1],value[2],value[3],value[4],value[5])
         self._resultsCell.append(datas)
-
+        self._hexs.GetCellData().AddArray(datas)
     def write(self):
         # polydata = vtk.vtkPolyData()
         # polydata.SetPoints(self._points)

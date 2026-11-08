@@ -6,6 +6,7 @@ from elementsTools import *
 from visuTools   import *
 from scipy.sparse import *
 from scipy.sparse.linalg import spsolve
+from numpy import *
 import time
 E         = 200000.
 nu        = 0.3
