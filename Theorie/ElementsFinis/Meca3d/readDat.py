@@ -38,6 +38,28 @@ def readDat(fname,indX=1,indY=2):
                                    nodes[p5],
                                    nodes[p6],
                                    nodes[p2]))
+         if int(res[1]) == 310:
+             p1  = int(res[2])-1
+             p2  = int(res[3])-1
+             p3  = int(res[4])-1
+             p4  = int(res[5])-1
+             p5  = int(res[6])-1
+             p6  = int(res[7])-1
+             p7  = int(res[8])-1
+             p8  = int(res[9])-1
+             p9  = int(res[10])-1
+             p10 = int(res[11])-1
+    
+             hexs.append(T10Meca3d(nodes[p1],
+                                   nodes[p2],
+                                   nodes[p3],
+                                   nodes[p4],
+                                   nodes[p5],
+                                   nodes[p6],
+                                   nodes[p7],
+                                   nodes[p8],
+                                   nodes[p9],
+                                   nodes[p10]   ))
     return nodes,hexs
 
 if __name__=='__main__':

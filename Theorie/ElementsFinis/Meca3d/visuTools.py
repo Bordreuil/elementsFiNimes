@@ -13,7 +13,9 @@ class resultsFile:
              self._points.InsertNextPoint(nodes[i].x(),nodes[i].y(),nodes[i].z())
         for el  in elements:
              hexa  = vtk.vtkHexahedron()
-             conn = el.connectivite()
+             if el.type() == 'Tetrahedre':
+                 hexa = vtk.vtkTetra()
+             conn = el.summits()
              for ii,n in enumerate(conn):
                  hexa.GetPointIds().SetId(ii,n)
              self._hexs.InsertNextCell(hexa.GetCellType(), hexa.GetPointIds())

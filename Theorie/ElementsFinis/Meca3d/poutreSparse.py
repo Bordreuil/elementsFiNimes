@@ -35,6 +35,7 @@ values = zeros((len(encastre),),'d')
 Fglob = zeros((ndofs,),'d')
 
 valeff = ones((len(efforts),))*1000.
+print('Effort total:',sum(valeff))
 Fglob[efforts] = valeff
 tdeb=time.time()
 datas       = {}
@@ -50,8 +51,6 @@ for el in els:
        el.setGaussPointsAndWeights(GP2,WP2)
        kel   = el.stiffness()
        ddls  = el.ddls()
-#       #Kglob.setValues(ddls,ddls,kel,PETSc.InsertMode.ADD)
-#       #Kglob = assembMatrix(Kglob,kel,ddls)
        for i,ido in enumerate(ddls):
            for j,idc in enumerate(ddls):
                datas[(ido,idc)]+=kel[i,j]
