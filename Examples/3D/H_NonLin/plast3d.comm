@@ -1,0 +1,106 @@
+# 
+# 
+# 	TP EF: Formation Genie mecanique Nimes
+# 	Quart de plaque trouee avec un comportement
+# 	Elasto-Plastique
+# 	Les groupes utilises dans l'analyse sont:
+# 	    - Haut pour l'application de l'effort
+# 	    - Sym1 et Sym2 pour l'application des conditions de symetries
+# 	 
+# 	 Contact : cyril.bordreuil@univ-montp2.fr
+# 
+# -----> Debut du calcul
+DEBUT()
+
+# -----> Lecture du maillage
+# 
+MAIL = LIRE_MAILLAGE(FORMAT='MED',
+                     UNITE=20)
+
+# -----> Orientation des mailles associes a la surface Haut
+#        ici un ensemble de lignes
+MAIL = MODI_MAILLAGE(reuse=MAIL,
+                     MAILLAGE=MAIL,
+                     ORIE_PEAU_3D=_F(GROUP_MA='Force'))
+
+# -----> Definition d un calcul en contraintes planes
+MODE = AFFE_MODELE(AFFE=_F(MODELISATION='3D',
+                           PHENOMENE='MECANIQUE',
+                           TOUT='OUI'),
+                   MAILLAGE=MAIL)
+
+# ------> Affectation du materiau
+# -----> Defintion du materiau
+CTRAC = DEFI_FONCTION(NOM_PARA='EPSI',
+                      PROL_DROITE='CONSTANT',
+                      PROL_GAUCHE='CONSTANT',
+                      VALE=(0.002185, 437.0, 0.020485, 497.0))
+
+MA = DEFI_MATERIAU(ELAS=_F(E=210000.0,
+                           NU=0.3),
+                   TRACTION=_F(SIGM=CTRAC))  # A ajouter pour de la traction en plasticite
+
+MATE = AFFE_MATERIAU(AFFE=_F(MATER=MA,
+                             TOUT='OUI'),
+                     MAILLAGE=MAIL)
+
+# ----> Definition de la resolution du probleme 
+# 	non lineaire et de sa resolution en temps
+# 	Le probleme est quasi statique : le temps
+# 	est un artifice pour gere la partie incrementale
+L_INST = DEFI_LIST_REEL(DEBUT=0.0,
+                        INTERVALLE=_F(JUSQU_A=1.0,
+                                      NOMBRE=10))
+
+F_SIGM = DEFI_FONCTION(NOM_PARA='INST',
+                       VALE=(0.0, 0.0, 1.0, 2.))
+
+# ------> Definition du chargement mecanique pour
+# 	  le quart de poutre
+CH1 = AFFE_CHAR_MECA(DDL_IMPO=_F(DX=0.0,
+                                 DY=0.0,
+                                 DZ=0.0,
+                                 GROUP_MA=('Encas', )),
+                     MODELE=MODE)
+
+CH2 = AFFE_CHAR_MECA(MODELE=MODE,
+                     PRES_REP=_F(GROUP_MA=('Force', ),
+                                 PRES=-125.0))
+
+# ------> Resolution du probleme
+# 	COMP_INCR : Gere le compertement incrementale du probleme
+# 	de statique non lineaire (ici Plasticite isotrope avec critere 
+# 	   	    		 de Von Mises avec definition de la courbe
+# 				 de traction (a defenir dans CHMA_MATE))
+RESU = STAT_NON_LINE(CHAM_MATER=MATE,
+                     COMPORTEMENT=_F(RELATION='VMIS_ISOT_TRAC'),
+                     CONVERGENCE=_F(ITER_GLOB_MAXI=200,RESI_GLOB_MAXI=20.),
+                     EXCIT=(_F(CHARGE=CH1),
+                            _F(CHARGE=CH2,
+                               FONC_MULT=F_SIGM)),
+                     INCREMENT=_F(LIST_INST=L_INST),
+	             SOLVEUR=_F(METHODE='MULT_FRONT'),
+                     MODELE=MODE,
+                     NEWTON=_F(REAC_ITER=3,  MATR_RIGI_SYME='OUI')) # calcul de la derivee a chaque iteration
+
+# ----> Calcul de valeur pour le post  traitement
+RESU = CALC_CHAMP(reuse=RESU,
+                  CONTRAINTE='SIEF_ELNO',
+                  CRITERES='SIEQ_ELNO',
+                  DEFORMATION=('EPSP_ELNO', 'EPSP_NOEU'),
+                  RESULTAT=RESU)
+
+RESU = CALC_CHAMP(reuse=RESU,
+                  CONTRAINTE='SIEF_NOEU',
+                  CRITERES='SIEQ_NOEU',
+                  RESULTAT=RESU)
+
+# -----> Impression du resulat au format MED
+IMPR_RESU(FORMAT='MED',
+          RESU=_F(MAILLAGE=MAIL,
+                  NOM_CHAM=('SIEF_NOEU', 'SIEQ_NOEU', 'DEPL', 'EPSP_NOEU'),
+                  RESULTAT=RESU),
+          UNITE=80)
+
+# CHECKSUM:9046512a71953ca37596d79ace404654  -:FIN CHECKSUM
+FIN()
