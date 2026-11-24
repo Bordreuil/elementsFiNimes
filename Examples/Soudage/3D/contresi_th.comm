@@ -1,0 +1,400 @@
+# 
+#
+#	Simulation numerique soudage multipasses
+#	Determination des contraintes residuelles
+#
+#	modelisation mecanique simplifiee de la passe
+#	procede 141
+#	passe 1
+#	
+#
+#
+#
+#------------------------------------------------------------------
+#                       CALCUL ASTER
+#-------------------------------------------------------------------
+# Pour poursuivre un calcul, il faut lui le dossier .base du resultat
+# que l'on veut poursuivre. cf figure astk_poursuite.png
+vit       = 100./60.
+tmaintien = 3.
+tsoudage  = 460./vit+tmaintien # temps de soudage
+tfin      = 600.               # temps de fin de l analyse
+incrS     = int(tsoudage)      # Nombre d increment pour le calcul
+	    		       # pour le soudage
+
+
+DEBUT();
+
+# Lecture du maillage
+
+MA=LIRE_MAILLAGE(UNITE=20,FORMAT='MED');
+MAM=LIRE_MAILLAGE(UNITE=21,FORMAT='MED');
+L_INST=DEFI_LIST_REEL(DEBUT=0.0,
+                      INTERVALLE=(_F(JUSQU_A=120.,
+                                    NOMBRE=240,),));
+#				  _F(JUSQU_A=tfin,
+#                                    NOMBRE=40,),),);
+
+#L_INSTS=DEFI_LIST_REEL(DEBUT=3.0,
+#                      INTERVALLE=(_F(JUSQU_A=tsoudage,
+#                                    NOMBRE=int(0.25*(incrS-3)),),
+#				  _F(JUSQU_A=tfin,
+#                                    NOMBRE=40,),),);
+
+
+# Definition des instants de calcul pour une analyse non lineraire
+
+MECA=AFFE_MODELE(MAILLAGE=MAM,
+                   #VERIF='MAILLE',
+                   AFFE=_F(TOUT='OUI',
+                           PHENOMENE='MECANIQUE',
+                           MODELISATION='3D',),);
+
+# Projection des champs du modele MODELE provenant de therm_p1.comm
+# sur le modele de mecanique MECA
+# Dans l affectation du modele le maillage est defini, il est donc envisageable
+# d'avoir deux maillages et de projeter un resultat sur l'autre maillage.
+TEMPCHA=LIRE_RESU(FORMAT='MED',
+		MAILLAGE=MA,
+		UNITE=81,
+		#PRECISION=1E-10,
+		TYPE_RESU='EVOL_THER',
+		TOUT_ORDRE='OUI',
+		FORMAT_MED=(_F(NOM_CHAM='TEMP',
+			       NOM_CHAM_MED='TEMP____TEMP',),),);
+
+MODELE=AFFE_MODELE(MAILLAGE=MAM,
+                   AFFE=_F(TOUT='OUI',
+                           PHENOMENE='THERMIQUE',
+                           MODELISATION='3D',),);
+
+PROJ_TH=PROJ_CHAMP(RESULTAT=TEMPCHA,
+                   #MODELE_1=MODELE,
+		   MAILLAGE_1=MA,
+                   #MODELE_2=MECA,
+		   MAILLAGE_2=MAM,);
+#		   );
+#                   VIS_A_VIS=_F(TOUT_1='NON',
+#                                TOUT_2='NON',),);
+#                                CAS_FIGURE='3D',),);
+# ============================
+# Parametres thermoelastiques
+# ============================
+
+E_Inox=DEFI_FONCTION(NOM_PARA    = 'TEMP',
+                    VALE        =(   20., 197000.,
+                                    100., 191500.,
+				    200., 184000.,
+				    300., 176500.,
+				    400., 168000.,
+				    500., 151500.,
+				    600., 147000.,
+				    700., 142500.,
+					                800., 130000.,
+					                900., 108000.,
+					               1000., 81500.,
+					               1100., 32000.,
+					               1200., 7400. ),
+                    PROL_DROITE ='CONSTANT',
+      			    PROL_GAUCHE ='CONSTANT',
+                    )
+# COEFFICIENT DE POISSON
+NU_Inox = DEFI_FONCTION(
+    NOM_PARA="TEMP",
+    VALE=(
+        25, 0.296,
+        100, 0.298,
+        200, 0.304,
+        400, 0.315,
+        500, 0.320,
+        600, 0.323,
+        700, 0.326,
+        800, 0.330,
+        900, 0.336,
+        1000, 0.339,
+        1100, 0.346,
+        1200, 0.349,
+        1300, 0.353,
+        1390, 0.353,
+        1420, 0.353,
+        1450, 0.353,
+        3000, 0.353,
+    ),
+    PROL_DROITE="CONSTANT",
+    PROL_GAUCHE="CONSTANT",
+)
+
+CTR20=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(0.0014568528,287.,
+                          1.,288.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR100=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(0.0012375979,237.,
+                          1.,238.,
+                          ),
+                   PROL_DROITE='CONSTANT',);
+
+CTR200=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(0.001076087,198.,
+                          1.,199.,
+                          ),
+                   PROL_DROITE='CONSTANT',);
+
+CTR300=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.745042493e-4,172.,
+                          1.,173.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR400=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.345238095e-4,157.,
+                          1.,158.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR500=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.9669967e-4,151.,
+                          1.,152.,
+                          ),
+                   PROL_DROITE='CONSTANT',);
+
+CTR600=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.8639e-4,145.,
+                          1.,146.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR700=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.543859649e-4,136.,
+                          1.,137.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR800=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.769230769e-4,127.,
+                          1.,128.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR900=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(0.0010648148,115.,
+                          1.,116.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR1000=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(9.693251534e-4,79.,
+                          1.,80.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR1100=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(0.0011875,38.,
+                          1.,39.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+CTR1200=DEFI_FONCTION(
+                    NOM_PARA='EPSI',
+                    VALE=(0.0032432432,24.,
+                          1.,25.,
+                          ),
+                    PROL_DROITE='CONSTANT',);
+
+SIG_Inox = DEFI_NAPPE(NOM_PARA     = 'TEMP',
+	              PARA         = (20,100,200,300,400,
+	              500,
+	              600,700,800,900,1000,1100,1200,),
+	              FONCTION     = (CTR20,CTR100,CTR200,CTR300,CTR400,
+	              CTR500,
+	              CTR600,CTR700,CTR800,CTR900,CTR1000,CTR1100,CTR1200,),
+                  PROL_DROITE  = 'CONSTANT',
+                  PROL_GAUCHE  = 'CONSTANT',);
+
+
+
+
+# COEFFICIENT DE DILATATION
+DTH_Inox = [
+    20.0, 15.9e-6,
+    100, 16.25e-6,
+    200, 16.70e-6,
+    300, 17.10e-6,
+    400, 17.40e-6,
+    500, 17.90e-6,
+    600, 18.30e-6,
+    700, 18.50e-6,
+    800, 18.80e-6,
+    900, 19.10e-6,
+    1000, 19.40e-6,
+    1100, 19.60e-6,
+    1200, 19.90e-6,
+    1420, 20.0e-6,
+]
+#
+ALP_Inox = DEFI_FONCTION(
+    NOM_PARA="TEMP", VALE=DTH_Inox, PROL_DROITE="CONSTANT", PROL_GAUCHE="CONSTANT"
+)
+
+
+# ==========================================
+# Parametres de restauration d ecrouissage
+# ==========================================
+# Parametres modele 1 : disponible version stable
+# ~ Tdebut = 1350.                # Temperature de debut de restauration
+# ~ Tfin   = 1400.                # Temperature de restauration complete
+Tdebut = 1075.0  # 800.                # Temperature de debut de restauration
+Tfin = 1150.0  # Temperature de restauration complete
+REST1 = DEFI_FONCTION(
+    NOM_PARA="TEMP", VALE=(Tdebut, 1.0, Tfin, 0.0), PROL_DROITE="CONSTANT", PROL_GAUCHE="CONSTANT"
+)
+# Parametres modele 2 : version developpement r&d
+#
+Tdebut = 600.0
+# Temperature de debut de restauration
+Tfin = 1300.0
+# Temperature de restauration complete
+#
+# Valeurs du coefficient alpha en fonction de la temperature
+L_alpha = [
+    680.0, 1.154,
+    750.0, 1.335,
+    825.0, 1.308,
+    900.0, 1.165,
+    1000.0, 0.181,
+    1075.0, 0.687,
+    1150.0, 0.408,
+]
+#
+# Valeurs du coefficient tau_infini en fonction de la temperature
+L_tauinf = [
+    Tdebut, 1.0,
+    680.0, 0.877,
+    750.0, 0.767,
+    825.0, 0.682,
+    900.0, 0.576,
+    1000.0, 0.071,
+    1075.0, 0.052,
+    1150.0, 0.045,
+    Tfin, 0.0,
+]
+#
+COEF1 = DEFI_FONCTION(
+    NOM_PARA="TEMP", VALE=(L_alpha), PROL_DROITE="CONSTANT", PROL_GAUCHE="LINEAIRE"
+)
+#
+TAU1 = DEFI_FONCTION(
+    NOM_PARA="TEMP", VALE=(L_tauinf), PROL_DROITE="CONSTANT", PROL_GAUCHE="CONSTANT"
+)     
+ 
+
+# Affectation des proprietes materiau 
+# L elasticite est une fonction de la temperature mot cle ELAS_FO
+#   on rentre ensuite les fonctions definies precedemment
+
+INOXM = DEFI_MATERIAU(
+        ELAS_FO=_F(E=E_Inox, NU=NU_Inox, TEMP_DEF_ALPHA=20.0, ALPHA=ALP_Inox),
+        TRACTION=_F(SIGM=SIG_Inox),
+        REST_ECRO = _F(COEF_ECRO=COEF1, TAU_INF=TAU1, TEMP_MINI=Tdebut, TEMP_MAXI=Tfin, EPSQ_MINI=0.005),
+    )
+
+
+
+# Affectation des proprietes materiaux
+# a tout le maillage
+# Le champ de temperature est une variable qu il faut 
+# affecter au niveau de l affectation du materiau
+CME=AFFE_MATERIAU(MAILLAGE=MAM,
+                    AFFE=(_F(TOUT='OUI',
+                           MATER=INOXM,),),
+               	    AFFE_VARC=(_F(TOUT='OUI',
+				NOM_VARC='TEMP',
+                                 EVOL=PROJ_TH,
+                                 VALE_REF=20.,),),);
+
+# Definition du chargement mecanique
+CHARM=AFFE_CHAR_MECA(MODELE=MECA,
+                     DDL_IMPO=(_F(GROUP_MA='CoteE',
+                                  DX=0.,
+                                  DY=0.,
+				  DZ=0.),
+                                  _F(GROUP_MA='Sym',
+                                  DX=0.,),),);
+
+
+# Resolution statique non lineaire
+# Pour la resolution du probleme non lineaire,
+# on resoud le problemen en considerant un probleme
+# plastique avec ecrouissage isotrope donne par la courbe de traction : 
+# VMIS_ISOT_TRAC 
+#
+# Pour la resolution non lineaire, on resoud la methode de Newton
+# en calculant la matrice tangente a chaque iteration
+# INCREMENT est le mot cle pour controle les instants de calcul
+# si, le pas de temps entre deux increments est trop long, on peut 
+# avoir non convergence du calcul
+
+DU=STAT_NON_LINE(MODELE=MECA,
+                 CHAM_MATER=CME,
+                 EXCIT=_F(CHARGE=CHARM,),
+                 COMPORTEMENT=_F(RELATION='VMIS_ISOT_TRAC',
+				ITER_INTE_MAXI=50,
+				ITER_INTE_PAS=10,
+				PARM_THETA=0.5),
+		 RECH_LINEAIRE = _F(ITER_LINE_MAXI = 8,),
+		 NEWTON=_F(REAC_INCR=1,
+                               MATRICE='TANGENTE',
+                               REAC_ITER=10,
+                               REAC_ITER_ELAS=50),
+	         SOLVEUR=_F(METHODE='MUMPS'),
+ 	         CONVERGENCE=_F(ITER_GLOB_MAXI=200,RESI_GLOB_MAXI=1.),
+                 INCREMENT=_F(LIST_INST=L_INST,)
+#		 ARCHIVAGE=_F(LIST_INST=L_INSTS,)
+,);
+
+
+
+# Extraction des resulats:
+# 	     - SIGM : Tenseur des contraintes
+#	       	    determine a partir des deplacements
+#	     - SIEQ : Contraintes equivalentes
+
+DU=CALC_CHAMP(CRITERES=('SIEQ_ELNO',),
+                CONTRAINTE=('SIEF_ELNO',),
+		DEFORMATION=('EPSP_ELNO'),
+                reuse=DU,
+               RESULTAT=DU,);
+
+# Moyennation au niveau des noeuds pour la visualisation
+DU=CALC_CHAMP(CRITERES=( 'SIEQ_NOEU',),
+                CONTRAINTE=('SIEF_NOEU',),
+		DEFORMATION=('EPSP_NOEU'),
+                reuse=DU,
+               RESULTAT=DU,);
+
+# Impression des resultats. GROUP_MA permet d'imprimer les resultats uniquement 
+# dans les groupes inox
+
+IMPR_RESU(FORMAT='MED',
+          UNITE=80,
+          RESU=_F(MAILLAGE=MAM,
+                  RESULTAT=DU,
+                  NOM_CHAM=('SIEF_NOEU','SIEQ_NOEU','DEPL','EPSP_NOEU'),
+                  TOUT='OUI',),);
+
+FIN(INFO_RESU='OUI',RETASSAGE='OUI',);
+#CHECKSUM:0869e7cc000957d504e49f562041e2fc  -:FIN CHECKSUM
